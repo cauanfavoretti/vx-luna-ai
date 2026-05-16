@@ -138,7 +138,7 @@ function IntroScreen({ onDone }) {
           o que vamos criar hoje?
           <span style={{
             display: "inline-block", marginLeft: 3,
-            animation: "vxBlink 1.05s steps(2, start) infinite",
+            animation: "vxBlink 2.05s steps(2, start) infinite",
             color: "var(--orange)",
           }}>_</span>
         </div>
@@ -384,7 +384,7 @@ function App() {
   const [generatingLabel, setGeneratingLabel] = useState(null);
   const [playbook, setPlaybook] = useState(null);
   const [showKeyModal, setShowKeyModal] = useState(!(window.VX_API?.getKey()));
-  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("vx_welcome_1.0"));
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("vx_welcome_2.0"));
   const [snapshots, setSnapshots] = useState([]);
   const [playbooks, setPlaybooks] = useState([]);
   const [activeSnapshotId, setActiveSnapshotId] = useState(loadActiveSnapshotId);
@@ -673,7 +673,7 @@ function App() {
         const wordCount = newHtml.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
         const pb = {
           id: "pb-" + Date.now().toString(36),
-          version: "1.0.0",
+          version: "2.0.0",
           generatedAt: new Date().toISOString(),
           title: `Playbook Operacional — ${empresa || activeSnapshot.empresa || "Empresa"}`,
           html: newHtml,
@@ -745,7 +745,7 @@ function App() {
         const empresa = (data.produto && data.produto.nome) || activeSnapshot.empresa || "Empresa";
         const pb = {
           id: "pb-" + Date.now().toString(36),
-          version: "1.0.0",
+          version: "2.0.0",
           generatedAt: new Date().toISOString(),
           title: `Playbook Operacional — ${empresa}`,
           html: newHtml,
@@ -871,7 +871,7 @@ function App() {
       />
       <APIKeyModal open={showKeyModal} onClose={() => setShowKeyModal(false)} />
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg(null)} />
-      <WelcomeModal open={showWelcome} onClose={() => { localStorage.setItem("vx_welcome_1.0", "1"); setShowWelcome(false); }} />
+      <WelcomeModal open={showWelcome} onClose={() => { localStorage.setItem("vx_welcome_2.0", "1"); setShowWelcome(false); }} />
     </div>
   );
 }
@@ -1537,7 +1537,7 @@ function SnapshotsView({ snapshots, activeSnapshotId, onActivate, onDelete, onEx
                           onMouseEnter={(e) => { if (!aiEditing && !aiEditAttLoading) { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.color = "var(--ink-2)"; } }}
                           onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--muted)"; }}
                         >
-                          <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                          <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M21.44 12.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                           {aiEditAttLoading ? "LENDO..." : "ANEXAR"}
                         </button>
                         <input
@@ -2381,7 +2381,7 @@ function TopBar({ totals, completedSections, sectionCount, savedAt, onGenerate, 
             <span style={{ color: "var(--orange)" }}>Luna AI</span>
           </div>
           <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.08em" }}>
-            AI-NATIVE · SALES OPS · v1.0
+            AI-NATIVE · SALES OPS · v2.0
           </div>
         </div>
       </div>
@@ -2579,7 +2579,7 @@ function Main({ section, idx, total, data, onChange, onPrev, onNext, onGenerate 
           </div>
           <h1 style={{
             margin: 0, fontSize: 44, fontWeight: 700, letterSpacing: "-0.01em",
-            lineHeight: 1.05, textTransform: "none",
+            lineHeight: 2.05, textTransform: "none",
           }}>
             {section.title}
             <span className="blink" style={{ color: "var(--orange)", marginLeft: 4 }}>_</span>
@@ -3000,7 +3000,7 @@ function GeneratingOverlay({ open, liveContent, editLabel }) {
       for (let i = 0; i < projected.length; i++) {
         const p = projected[i];
         const depth = (p.z + 1) / 2; // 0..1
-        const size = (1.0 + depth * 2.4) * dpr;
+        const size = (2.0 + depth * 2.4) * dpr;
         const alpha = 0.18 + depth * 0.82;
 
         // Color blend: white core to orange edges based on depth
@@ -4107,7 +4107,7 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
                   onMouseEnter={(e) => { if (!editAttLoading) { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.color = "var(--ink-2)"; } }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--muted)"; }}
                 >
-                  <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                  <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M21.44 12.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                   {editAttLoading ? "LENDO..." : "ANEXAR"}
                 </button>
                 <input
@@ -4421,7 +4421,7 @@ function TemplateModal({ open, onClose, onLoad }) {
                         borderRadius: 14, padding: "18px 18px 16px",
                         cursor: "pointer", textAlign: "left",
                         transition: "all .18s",
-                        transform: isSelected ? "scale(1.01)" : "scale(1)",
+                        transform: isSelected ? "scale(2.01)" : "scale(1)",
                       }}
                     >
                       {/* Icon + name */}
@@ -4732,7 +4732,7 @@ function WelcomeModal({ open, onClose }) {
             fontFamily: "var(--mono)", fontSize: 10, color: "var(--orange)", letterSpacing: "0.14em",
           }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--orange)", display: "inline-block" }} />
-            VERSÃO 1.0 · LANÇAMENTO OFICIAL
+            VERSÃO 2.0 · LANÇAMENTO OFICIAL
           </div>
 
           {/* Título */}
@@ -4741,7 +4741,7 @@ function WelcomeModal({ open, onClose }) {
             color: "#f5efe4", lineHeight: 1.15, marginBottom: 10,
           }}>
             Boas-vindas à<br />
-            <span style={{ color: "var(--orange)" }}>Luna AI 1.0</span>
+            <span style={{ color: "var(--orange)" }}>Luna AI 2.0</span>
           </div>
 
           {/* Subtítulo */}
@@ -4773,7 +4773,7 @@ function WelcomeModal({ open, onClose }) {
               boxShadow: "0 4px 24px rgba(255,91,21,0.40)",
               transition: "opacity .15s, transform .15s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "scale(1.02)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "scale(2.02)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "scale(1)"; }}
           >
             Começar agora
