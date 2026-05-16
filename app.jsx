@@ -384,6 +384,7 @@ function App() {
   const [generatingLabel, setGeneratingLabel] = useState(null);
   const [playbook, setPlaybook] = useState(null);
   const [showKeyModal, setShowKeyModal] = useState(!(window.VX_API?.getKey()));
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("vx_welcome_1.0"));
   const [snapshots, setSnapshots] = useState([]);
   const [playbooks, setPlaybooks] = useState([]);
   const [activeSnapshotId, setActiveSnapshotId] = useState(loadActiveSnapshotId);
@@ -870,6 +871,7 @@ function App() {
       />
       <APIKeyModal open={showKeyModal} onClose={() => setShowKeyModal(false)} />
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg(null)} />
+      <WelcomeModal open={showWelcome} onClose={() => { localStorage.setItem("vx_welcome_1.0", "1"); setShowWelcome(false); }} />
     </div>
   );
 }
@@ -4664,6 +4666,121 @@ function ErrorModal({ msg, onClose }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ───────────────────────── WELCOME MODAL ───────────────────────── */
+
+function WelcomeModal({ open, onClose }) {
+  const [closing, setClosing] = useState(false);
+
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => { setClosing(false); onClose(); }, 320);
+  };
+
+  if (!open) return null;
+
+  const overlayAnim = closing ? "welcomeOut .32s ease both" : "welcomeIn .38s cubic-bezier(.22,.68,0,1.2) both";
+  const cardAnim    = closing ? "welcomeCardOut .32s cubic-bezier(.4,0,1,1) both" : "welcomeCardIn .42s cubic-bezier(.22,.68,0,1.2) both";
+
+  return (
+    <>
+      <style>{`
+        @keyframes welcomeIn       { from { opacity:0 } to { opacity:1 } }
+        @keyframes welcomeOut      { from { opacity:1 } to { opacity:0 } }
+        @keyframes welcomeCardIn   { from { opacity:0; transform: scale(.6)  } to { opacity:1; transform: scale(1)  } }
+        @keyframes welcomeCardOut  { from { opacity:1; transform: scale(1)   } to { opacity:0; transform: scale(.6) } }
+      `}</style>
+      <div
+        onClick={handleClose}
+        style={{
+          position: "fixed", inset: 0, zIndex: 1500,
+          background: "rgba(5,4,3,0.88)", backdropFilter: "blur(16px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+          animation: overlayAnim,
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: "100%", maxWidth: 460,
+            background: "#0a0907",
+            border: "1px solid rgba(255,91,21,0.35)",
+            borderRadius: 20,
+            padding: "44px 36px 36px",
+            boxShadow: "0 0 80px rgba(255,91,21,0.14), 0 24px 80px rgba(0,0,0,0.8)",
+            animation: cardAnim,
+            position: "relative",
+            overflow: "hidden",
+            textAlign: "center",
+          }}
+        >
+          {/* Glow de fundo */}
+          <div style={{
+            position: "absolute", top: -80, left: "50%", transform: "translateX(-50%)",
+            width: 300, height: 300, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,91,21,0.10) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Badge versão */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 7,
+            padding: "4px 16px", borderRadius: 999, marginBottom: 28,
+            background: "rgba(255,91,21,0.10)", border: "1px solid rgba(255,91,21,0.30)",
+            fontFamily: "var(--mono)", fontSize: 10, color: "var(--orange)", letterSpacing: "0.14em",
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--orange)", display: "inline-block" }} />
+            VERSÃO 1.0 · LANÇAMENTO OFICIAL
+          </div>
+
+          {/* Título */}
+          <div style={{
+            fontSize: 30, fontWeight: 800, fontFamily: "var(--display)",
+            color: "#f5efe4", lineHeight: 1.15, marginBottom: 10,
+          }}>
+            Boas-vindas à<br />
+            <span style={{ color: "var(--orange)" }}>Luna AI 1.0</span>
+          </div>
+
+          {/* Subtítulo */}
+          <div style={{
+            fontSize: 15, fontWeight: 600, color: "var(--ink-2)",
+            fontFamily: "var(--display)", marginBottom: 20,
+          }}>
+            A atualização oficial chegou!
+          </div>
+
+          {/* Divisor */}
+          <div style={{ height: 1, background: "rgba(255,91,21,0.15)", marginBottom: 22 }} />
+
+          {/* Corpo */}
+          <div style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.7, fontFamily: "var(--display)", marginBottom: 32 }}>
+            Descubra novas formas de criar playbooks<br />e muito mais <strong style={{ color: "var(--ink)" }}>brevemente</strong>.<br /><br />
+            <span style={{ color: "var(--orange)", fontWeight: 600 }}>Poupe tempo e gere processos.</span>
+          </div>
+
+          {/* Botão */}
+          <button
+            onClick={handleClose}
+            style={{
+              width: "100%", padding: "15px 0", borderRadius: 12, cursor: "pointer",
+              background: "linear-gradient(135deg, #ff5b15, #c4400a)",
+              border: "none", color: "#fff",
+              fontFamily: "var(--display)", fontSize: 15, fontWeight: 700,
+              letterSpacing: "0.02em",
+              boxShadow: "0 4px 24px rgba(255,91,21,0.40)",
+              transition: "opacity .15s, transform .15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "scale(1.02)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "scale(1)"; }}
+          >
+            Começar agora
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
