@@ -1,0 +1,162 @@
+O QUE O HUMANO PRECISA ENTREGAR
+1. INFORMAÇÕES DA EMPRESA
+Dados básicos
+Nome da empresa
+Site
+Instagram
+Nicho
+Tempo de mercado
+Região
+Quantidade de funcionários
+Estrutura comercial
+Posicionamento
+
+Perguntas:
+
+O que a empresa vende?
+Qual principal transformação?
+Qual diferencial?
+Qual promessa?
+Como deseja ser percebida?
+2. ICP — CLIENTE IDEAL
+
+A IA precisa entender:
+
+quem compra
+quem fecha
+quem dá problema
+quem gera lucro
+Perguntas inteligentes
+Segmento
+Quem é o cliente ideal?
+Qual setor?
+B2B ou B2C?
+Perfil financeiro
+Ticket médio
+Faturamento ideal do cliente
+Estrutura mínima ideal
+Dores
+Qual principal dor do cliente?
+O que mais faz perder vendas?
+O que gera urgência?
+3. OFERTA E PRODUTO
+
+A IA precisa entender:
+
+o que é vendido
+como é vendido
+como gera valor
+Coleta
+Oferta
+Produtos
+Serviços
+Planos
+Preços
+Benefícios
+Quais resultados entrega?
+O que melhora?
+Qual economia gera?
+Diferenciais
+O que vocês fazem melhor?
+Por que escolher vocês?
+4. PROCESSO COMERCIAL
+
+Aqui está o coração do playbook.
+
+A IA deve mapear:
+Entrada de lead
+De onde vêm os leads?
+Qual canal converte mais?
+Qualificação
+Como avaliam um lead bom?
+O que desqualifica?
+Diagnóstico
+Existe reunião?
+Existe script?
+Existe apresentação?
+Fechamento
+Como fecham?
+Existe proposta?
+Existe negociação?
+Pós-venda
+Como entregam?
+Existe onboarding?
+5. OBJEÇÕES
+
+A IA precisa alimentar:
+
+scripts
+respostas
+treinamentos
+Perguntas
+Qual objeção mais comum?
+O que impede fechamento?
+O que gera insegurança?
+6. MÉTRICAS E PERFORMANCE
+
+A IA pode gerar:
+
+KPIs
+dashboards
+metas
+SLA
+Dados importantes
+Conversão
+Ticket médio
+CAC
+Tempo de fechamento
+Volume de leads
+7. OPERAÇÃO INTERNA
+
+A IA precisa entender:
+
+quem faz o quê
+gargalos
+ferramentas
+Coleta
+CRM utilizado
+Ferramentas
+WhatsApp
+Equipe
+Funis
+Processos internos
+8. TOM DE COMUNICAÇÃO
+
+Extremamente importante.
+
+A IA precisa adaptar:
+
+linguagem
+scripts
+abordagem
+Perguntas
+Comunicação formal ou informal?
+Mais premium ou agressiva?
+Consultiva ou direta?
+Técnica ou simples?
+9. CASES E RESULTADOS
+
+Isso permite a IA criar:
+
+prova social
+argumentos
+fechamento
+Coleta
+Cases
+Resultados
+ROI
+Prints
+Depoimentos
+10. MATERIAL BRUTO
+
+Uma IA premium deve aceitar uploads de:
+
+Arquivos
+PDFs
+propostas
+contratos
+apresentações
+reuniões gravadas
+prints do CRM
+SOPs
+mensagens de vendas

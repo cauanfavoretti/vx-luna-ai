@@ -1,0 +1,4 @@
+{
+  "buildCommand": "node -e \"require('fs').writeFileSync('env-config.js', 'window.__VX_KEY__=' + JSON.stringify(process.env.VITE_OPENAI_API_KEY || '') + ';');\"",
+  "outputDirectory": "."
+}
