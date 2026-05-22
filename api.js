@@ -706,7 +706,7 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
           });
         } catch (fetchErr) {
           if (fetchErr.name === "AbortError") {
-            throw new Error("Timeout após 8 minutos. Tente novamente.");
+            throw new Error("Timeout de rede. Tente novamente.");
           }
           throw new Error("Falha de rede: " + fetchErr.message);
         }
@@ -743,7 +743,7 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
             const isOurTimeout = abort.signal.aborted;
 
             if (isOurTimeout) {
-              throw new Error("__FATAL__ Timeout: o modelo demorou mais de 8 minutos. Tente novamente.");
+              throw new Error("__FATAL__ Timeout: o modelo demorou mais de 30 minutos. Tente novamente.");
             }
 
             if (content.length > 5000 && attempt > MAX_RETRIES) {

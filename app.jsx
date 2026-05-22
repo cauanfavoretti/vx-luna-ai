@@ -3281,7 +3281,7 @@ function GeneratingOverlay({ open, liveContent, editLabel }) {
           flexShrink: 0,
           display: "flex", justifyContent: "space-between",
         }}>
-          <span>model: claude-sonnet-4-6 · stream: true · max_tokens: 50000</span>
+          <span>model: claude-sonnet-4-6 · stream: true · max_tokens: 64000</span>
           <span style={{ color: "var(--orange)" }}>
             {charCount > 0 ? "● RECEBENDO" : "○ AGUARDANDO"}
           </span>
