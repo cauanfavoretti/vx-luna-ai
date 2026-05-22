@@ -929,27 +929,29 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
-      const compactSystemPrefix = !baseTemplate
-        ? `══════ MODO COMPACTO — LEIA ANTES DE QUALQUER OUTRA INSTRUÇÃO ══════
-LIMITE ABSOLUTO DE OUTPUT: 54.000 caracteres totais de HTML.
-Esta restrição SOBREPÕE qualquer outra instrução de quantidade abaixo.
+      const COMPACT_S06 = `─── SEÇÃO 06 · SCRIPTS DE VENDAS ───
+Hero da seção. EXATAMENTE 5 accordions — scripts completos, concisos e personalizados. Blocos terminal premium: bg surface, border-left 4px primary, badge canal emoji pill (📱WhatsApp / 📧Email / 📞Call / 💬DM), BOTÃO "📋 Copiar".
 
-REDUÇÕES OBRIGATÓRIAS (substituem os padrões do sistema):
-• S06 Scripts de Vendas: gere APENAS 5 accordions — ①Qualificação (3 msgs) ②Follow Up sem resposta (3 msgs) ③Agendamento (2 msgs) ④Fechamento (script + 3 frases) ⑤Quebra de Objeção (tabela 5 objeções). NÃO gere os outros 4.
-• S07 Time Comercial: gere APENAS 4 cargos — SDR, Closer, Pós Venda e Gestor. NÃO gere BDR, Farmer, Analista de CRM nem Resgate. Por cargo: responsabilidades máx 4 itens, KPIs máx 3, rotina como lista (não tabela), remuneração em 3 linhas.
-• S04 ICP: gere APENAS 2 accordions — Cliente Principal e Anti-ICP. Suprimir Perfil Secundário.
-• S02 Mercado: gere APENAS 2 accordions. Tabela concorrentes máx 3 linhas. Cards individuais máx 2 concorrentes.
-• S01 Boas-Vindas: gere 3 accordions (não 4). Sem accordion Nossa Cultura ou fundido em 4 bullets no Sobre a Empresa.
-• Todas as seções: parágrafos máx 2 frases, listas máx 4 itens, tabelas máx 4 linhas de dados.
-• Nenhum texto introdutório ou de preenchimento — cada frase deve conter dado real do cliente.
-══════════════════════════════════════════════════════════════════
+① Cadência de Qualificação — 3 mensagens: abertura com gancho + diagnóstico SPIN + proposta de próximo passo. Máx 3 linhas por mensagem.
+② Follow Up — Sem Resposta — 3 mensagens (D+1, D+3, D+7): ganchos distintos (curiosidade / prova social / último contato). Máx 3 linhas cada.
+③ Cadência de Agendamento — 2 mensagens: proposta de horário com opções + confirmação. Máx 3 linhas cada.
+④ Script de Fechamento — script direto da call (6-8 frases encadeadas) + 3 frases alternativas de fechamento em pills coloridas.
+⑤ Quebra de Objeção — tabela premium com 5 objeções: Objeção | Resposta Completa | Técnica.`;
 
-`
-        : "";
+      const COMPACT_S07 = `─── SEÇÃO 07 · ESTRUTURAÇÃO DO TIME COMERCIAL ───
+Hero da seção. EXATAMENTE 4 accordions — um por cargo: SDR, Closer, Pós Venda e Gestor Comercial. NÃO gerar BDR, Farmer, Analista de CRM nem Resgate.
+
+Cada accordion contém UM ÚNICO CARD com: objetivo em 1 linha + responsabilidades checklist ✓ (4 itens) + KPIs (3, em mini stat cards) + ferramentas em badges + remuneração em 3 linhas (base | comissão | bônus). SEM tabela de rotina semanal, SEM tabela de simulação de ganhos, SEM entregáveis por período.`;
+
+      const activeSystemPrompt = !baseTemplate
+        ? SYSTEM_PROMPT
+            .replace(/─── SEÇÃO 06 · SCRIPTS DE VENDAS ───[\s\S]*?(?=─── SEÇÃO 07)/, COMPACT_S06 + "\n\n")
+            .replace(/─── SEÇÃO 07 · ESTRUTURAÇÃO DO TIME COMERCIAL ───[\s\S]*?(?=O resultado deve parecer)/, COMPACT_S07 + "\n\n")
+        : SYSTEM_PROMPT;
 
       let htmlContent = await callAnthropic(
         [
-          { role: "system", content: compactSystemPrefix + SYSTEM_PROMPT },
+          { role: "system", content: activeSystemPrompt },
           {
             role: "user",
             content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock +
