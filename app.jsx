@@ -2382,7 +2382,7 @@ function TopBar({ totals, completedSections, sectionCount, savedAt, onGenerate, 
             <span style={{ color: "var(--orange)" }}>Luna AI</span>
           </div>
           <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.08em" }}>
-            AI-NATIVE · SALES OPS · v2.0
+            AI-NATIVE · SALES OPS · v1.1 Beta
           </div>
         </div>
       </div>
@@ -2418,6 +2418,17 @@ function TopBar({ totals, completedSections, sectionCount, savedAt, onGenerate, 
         <span style={{ color: "var(--orange)", fontWeight: 600 }}>{totals.pct}%</span>
         <span style={{ color: "var(--muted-2)" }}>·</span>
         <span>{completedSections}/{sectionCount} seções</span>
+      </div>
+
+      <div style={{
+        display: "flex", alignItems: "center", gap: 6,
+        padding: "5px 11px", borderRadius: 999,
+        border: "1px solid rgba(167,139,250,0.25)",
+        background: "rgba(167,139,250,0.06)",
+        fontFamily: "var(--mono)", fontSize: 10, color: "#a78bfa", letterSpacing: "0.06em",
+      }}>
+        <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+        {(window.VX_API?.config?.openaiModel || "claude-sonnet-4-6").replace("claude-", "")}
       </div>
 
       <button
@@ -3270,7 +3281,7 @@ function GeneratingOverlay({ open, liveContent, editLabel }) {
           flexShrink: 0,
           display: "flex", justifyContent: "space-between",
         }}>
-          <span>model: claude-opus-4-7 · stream: true · max_tokens: 50000</span>
+          <span>model: claude-sonnet-4-6 · stream: true · max_tokens: 50000</span>
           <span style={{ color: "var(--orange)" }}>
             {charCount > 0 ? "● RECEBENDO" : "○ AGUARDANDO"}
           </span>
@@ -4261,7 +4272,7 @@ function APIKeyModal({ open, onClose }) {
         </div>
 
         <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.55, marginBottom: 20 }}>
-          A chave é usada diretamente do browser para chamar o modelo <strong style={{ color: "var(--ink)" }}>Claude Opus 4.7</strong> e gerar o playbook em HTML.
+          A chave é usada diretamente do browser para chamar o modelo <strong style={{ color: "var(--ink)" }}>Claude Sonnet 4.6</strong> e gerar o playbook em HTML.
           Obtenha sua chave em <strong style={{ color: "var(--orange)" }}>console.anthropic.com/settings/keys</strong>.
         </div>
 
