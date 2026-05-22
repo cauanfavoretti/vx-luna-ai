@@ -914,24 +914,6 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
               baseTemplate.content.slice(0, 20000))
         : "";
 
-      const compactModeBlock = !baseTemplate
-        ? `\n\n════════════════════════════════════\nMODO COMPACTO — LIMITE RÍGIDO DE OUTPUT\n════════════════════════════════════\n` +
-          `ATENÇÃO: você DEVE gerar o playbook com no máximo 54.000 caracteres totais de HTML. Este é um limite absoluto, não uma sugestão.\n\n` +
-          `REGRAS INEGOCIÁVEIS:\n` +
-          `① Todas as 7 seções obrigatórias devem estar presentes — sidebar e navegação completas.\n` +
-          `② CSS, JavaScript, design e componentes visuais são preservados — o corte é EXCLUSIVAMENTE no volume de conteúdo textual.\n` +
-          `③ Zero texto decorativo, introdutório ou genérico. Cada frase deve conter dado real do cliente.\n` +
-          `④ Parágrafos: máx 2 frases. Listas: máx 4 itens. Tabelas: máx 4 linhas de dados.\n` +
-          `⑤ NÃO repita informação entre seções — cada dado do cliente aparece uma única vez.\n\n` +
-          `LIMITES RÍGIDOS POR SEÇÃO:\n` +
-          `S01 · Boas-Vindas — 3 accordions (não 4). MVV: 1 parágrafo por card. Bio expert: 3 linhas. Cultura: 4 pilares, 1 linha cada.\n` +
-          `S02 · Mercado — 2 accordions (não 3). Tabela concorrentes: máx 3 linhas. Cards individuais: máx 2 concorrentes.\n` +
-          `S03 · Produtos — Por produto: checklist máx 4 itens, sem tabela de planos/tiers, 2 pilares de valor (não 3).\n` +
-          `S04 · ICP — 2 accordions: Cliente Principal + Anti-ICP (suprimir o Secundário ou fundir em 3 bullets no principal). Persona: 4 atributos. Qualificação: 4 critérios.\n` +
-          `S05 · Operação — Fluxograma: máx 6 etapas. Tabela SLA: máx 5 linhas. Gargalos: máx 2 cards.\n` +
-          `S06 · Scripts — APENAS 5 accordions (não 9): ①Qualificação (3 msgs) ②Follow Up sem resposta (3 msgs) ③Agendamento (2 msgs) ④Fechamento (script direto + 3 frases de fechamento) ⑤Quebra de Objeção (tabela com 5 objeções). Cada mensagem: máx 3 linhas.\n` +
-          `S07 · Time — APENAS 4 cargos (não 7): SDR, Closer, Pós Venda e Gestor Comercial. Por cargo: responsabilidades máx 4 itens, KPIs máx 3, rotina como lista simples sem tabela, remuneração em 3 linhas.\n`
-        : "";
 
       const MILESTONES = [
         { chars: 2000,  label: "01 · Criando Manual de Boas Vindas..." },
@@ -947,12 +929,30 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
+      const compactSystemPrefix = !baseTemplate
+        ? `══════ MODO COMPACTO — LEIA ANTES DE QUALQUER OUTRA INSTRUÇÃO ══════
+LIMITE ABSOLUTO DE OUTPUT: 54.000 caracteres totais de HTML.
+Esta restrição SOBREPÕE qualquer outra instrução de quantidade abaixo.
+
+REDUÇÕES OBRIGATÓRIAS (substituem os padrões do sistema):
+• S06 Scripts de Vendas: gere APENAS 5 accordions — ①Qualificação (3 msgs) ②Follow Up sem resposta (3 msgs) ③Agendamento (2 msgs) ④Fechamento (script + 3 frases) ⑤Quebra de Objeção (tabela 5 objeções). NÃO gere os outros 4.
+• S07 Time Comercial: gere APENAS 4 cargos — SDR, Closer, Pós Venda e Gestor. NÃO gere BDR, Farmer, Analista de CRM nem Resgate. Por cargo: responsabilidades máx 4 itens, KPIs máx 3, rotina como lista (não tabela), remuneração em 3 linhas.
+• S04 ICP: gere APENAS 2 accordions — Cliente Principal e Anti-ICP. Suprimir Perfil Secundário.
+• S02 Mercado: gere APENAS 2 accordions. Tabela concorrentes máx 3 linhas. Cards individuais máx 2 concorrentes.
+• S01 Boas-Vindas: gere 3 accordions (não 4). Sem accordion Nossa Cultura ou fundido em 4 bullets no Sobre a Empresa.
+• Todas as seções: parágrafos máx 2 frases, listas máx 4 itens, tabelas máx 4 linhas de dados.
+• Nenhum texto introdutório ou de preenchimento — cada frase deve conter dado real do cliente.
+══════════════════════════════════════════════════════════════════
+
+`
+        : "";
+
       let htmlContent = await callAnthropic(
         [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: compactSystemPrefix + SYSTEM_PROMPT },
           {
             role: "user",
-            content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock + compactModeBlock +
+            content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock +
               "\n\nAgora gere o playbook operacional premium completo em HTML, " +
               "personalizando profundamente todo o conteúdo com os dados acima. " +
               "Retorne APENAS o HTML, começando com <!DOCTYPE html>.",
@@ -1005,6 +1005,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
         html: htmlContent,
         pages: 1,
         wordCount,
+        compact: !baseTemplate,
         sections: [
           "01 · Manual de Boas Vindas",
           "02 · Estudo de Mercado",

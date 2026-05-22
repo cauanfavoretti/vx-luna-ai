@@ -3622,11 +3622,67 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
   const [editAttachments, setEditAttachments] = useState([]);
   const [editAttLoading, setEditAttLoading] = useState(false);
   const editFileRef = useRef(null);
+  const [compactBannerDismissed, setCompactBannerDismissed] = useState(false);
 
   if (!playbook) return null;
 
+  const CompactBanner = () => {
+    if (!playbook.compact || compactBannerDismissed) return null;
+    return (
+      <div style={{
+        position: "fixed", left: 0, top: "50%", transform: "translateY(-50%)",
+        zIndex: 1200, width: 220,
+        background: "var(--surface-2)",
+        border: "1px solid var(--border-strong)",
+        borderLeft: "none",
+        borderRadius: "0 12px 12px 0",
+        padding: "16px 16px 14px 18px",
+        boxShadow: "4px 0 24px rgba(0,0,0,0.5)",
+        animation: "slideInLeft .3s cubic-bezier(.22,.68,0,1.2) both",
+      }}>
+        <style>{`@keyframes slideInLeft { from { opacity:0; transform: translateY(-50%) translateX(-100%) } to { opacity:1; transform: translateY(-50%) translateX(0) } }`}</style>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--gold)", flexShrink: 0, marginTop: 1 }} />
+            <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--gold)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              Versão Compacta
+            </span>
+          </div>
+          <button
+            onClick={() => setCompactBannerDismissed(true)}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--muted-2)", padding: 0, lineHeight: 1, flexShrink: 0 }}
+            title="Fechar"
+          >
+            <window.Icon name="x" size={13} />
+          </button>
+        </div>
+        <div style={{ fontFamily: "var(--display)", fontSize: 12, color: "var(--ink-2)", lineHeight: 1.55, marginBottom: 12 }}>
+          Esta é uma versão comprimida do playbook. Continue editando na aba edição para expandir o conteúdo.
+        </div>
+        <button
+          onClick={() => { setCompactBannerDismissed(true); setEditing(true); }}
+          style={{
+            width: "100%", padding: "7px 0", borderRadius: 7, cursor: "pointer",
+            background: "rgba(255,181,71,0.12)", border: "1px solid rgba(255,181,71,0.35)",
+            color: "var(--gold)", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.06em",
+            transition: "background .15s",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,181,71,0.22)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,181,71,0.12)"}
+        >
+          Ir para Edição →
+        </button>
+      </div>
+    );
+  };
+
   if (editing) {
-    return <PlaybookEditor playbook={playbook} onClose={() => setEditing(false)} />;
+    return (
+      <>
+        <CompactBanner />
+        <PlaybookEditor playbook={playbook} onClose={() => setEditing(false)} />
+      </>
+    );
   }
 
   const handleSaveSnapshot = async () => {
@@ -3724,6 +3780,8 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
   ];
 
   return (
+    <>
+    <CompactBanner />
     <div style={{
       position: "fixed", inset: 0, zIndex: 1100,
       background: "rgba(8,7,6,0.95)", backdropFilter: "blur(16px)",
@@ -4187,6 +4245,7 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
         </div>
       </div>
     </div>
+    </>
   );
 }
 
