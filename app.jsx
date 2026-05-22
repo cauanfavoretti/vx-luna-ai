@@ -3623,6 +3623,11 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
   const [editAttLoading, setEditAttLoading] = useState(false);
   const editFileRef = useRef(null);
   const [tokenBannerDismissed, setTokenBannerDismissed] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
+  const [enhanceStep, setEnhanceStep] = useState("");
+  const [enhanceChars, setEnhanceChars] = useState(0);
+  const [enhanceDone, setEnhanceDone] = useState(false);
+  const [enhanceError, setEnhanceError] = useState(null);
 
   if (!playbook) return null;
 
@@ -3744,6 +3749,31 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
     } finally {
       setEditLoading(false);
       setEditChars(0);
+    }
+  };
+
+  const handleEnhance = async () => {
+    if (enhancing) return;
+    setEnhancing(true);
+    setEnhanceStep("Iniciando aprimoramento...");
+    setEnhanceChars(0);
+    setEnhanceError(null);
+    setEnhanceDone(false);
+    try {
+      const newHtml = await window.VX_API.enhanceDesign({
+        html: playbook.html,
+        onStep: ({ label }) => setEnhanceStep(label),
+        onToken: (_, acc) => setEnhanceChars(acc.length),
+      });
+      onUpdate && onUpdate(newHtml);
+      setEnhanceDone(true);
+      setTimeout(() => setEnhanceDone(false), 5000);
+    } catch (err) {
+      setEnhanceError(err.message || "Erro ao aprimorar. Tente novamente.");
+    } finally {
+      setEnhancing(false);
+      setEnhanceChars(0);
+      setEnhanceStep("");
     }
   };
 
@@ -3947,6 +3977,95 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
             ABRIR →
           </span>
         </button>
+
+        {/* Aprimorar Design */}
+        {enhanceDone ? (
+          <div style={{
+            marginBottom: 12, padding: "14px 18px", borderRadius: 12,
+            background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.4)",
+            display: "flex", alignItems: "center", gap: 12,
+          }}>
+            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth={1.8} strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "var(--display)", fontWeight: 600, fontSize: 14, color: "#a78bfa" }}>Design aprimorado!</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted)", marginTop: 2 }}>Abra o preview para ver as melhorias aplicadas</div>
+            </div>
+          </div>
+        ) : enhancing ? (
+          <div style={{
+            marginBottom: 12, padding: "14px 18px", borderRadius: 12,
+            background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.3)",
+            display: "flex", flexDirection: "column", gap: 10,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                background: "rgba(139,92,246,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "var(--display)", fontWeight: 600, fontSize: 14, color: "#a78bfa" }}>Aprimorando Design…</div>
+                <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{enhanceStep}</div>
+              </div>
+              {enhanceChars > 0 && (
+                <span style={{ fontFamily: "var(--mono)", fontSize: 10, color: "#a78bfa", letterSpacing: "0.06em" }}>
+                  {(enhanceChars / 1000).toFixed(1)}k
+                </span>
+              )}
+            </div>
+            <div style={{ width: "100%", height: 2, background: "rgba(139,92,246,0.12)", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", background: "linear-gradient(90deg,#7c3aed,#a78bfa)",
+                borderRadius: 2, animation: "indeterminate 1.4s ease infinite",
+                width: "40%",
+              }}/>
+            </div>
+            <style>{`@keyframes indeterminate{0%{transform:translateX(-250%)}100%{transform:translateX(350%)}}`}</style>
+          </div>
+        ) : (
+          <button
+            onClick={handleEnhance}
+            style={{
+              width: "100%", marginBottom: 12,
+              padding: "15px 22px", borderRadius: 12,
+              background: "rgba(139,92,246,0.06)", color: "var(--ink)",
+              border: "1px solid rgba(139,92,246,0.3)", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 12,
+              fontFamily: "var(--display)", textAlign: "left",
+              transition: "all .15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(139,92,246,0.12)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.55)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(139,92,246,0.06)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)"; }}
+          >
+            <div style={{
+              width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+              background: "rgba(139,92,246,0.15)", color: "#a78bfa",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: "#a78bfa" }}>Aprimorar Design</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted)", letterSpacing: "0.04em", marginTop: 2 }}>
+                IA analisa e melhora animações, layout e símbolos · sem alterar o conteúdo
+              </div>
+            </div>
+            <span style={{ marginLeft: "auto", fontFamily: "var(--mono)", fontSize: 10, color: "#a78bfa", letterSpacing: "0.1em" }}>
+              AUTO →
+            </span>
+          </button>
+        )}
+        {enhanceError && (
+          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", fontFamily: "var(--mono)", fontSize: 12, color: "#f87171" }}>
+            {enhanceError}
+          </div>
+        )}
 
         {/* Save as Snapshot */}
         {snapSaved ? (

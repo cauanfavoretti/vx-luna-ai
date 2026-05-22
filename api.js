@@ -300,7 +300,13 @@ O resultado deve parecer um sistema proprietário de operação, não um PDF sim
 4. Personalize TODO o conteúdo com os dados fornecidos. Nunca use conteúdo genérico quando há dado disponível.
 5. Adapte terminologia: saúde→paciente/tratamento | B2B→lead/solução | agência→cliente/campanha | imóveis→comprador/imóvel | SaaS→usuário/plano.
 6. NÃO faça: layout de blog, documento Word, visual genérico, página corrida de texto, cards pobres, tipografia ruim, interface poluída ou design amador.
-7. TAMANHO ALVO: o HTML final deve ter aproximadamente 45.000 a 55.000 caracteres. Gerencie o ritmo da escrita ao longo das 7 seções para chegar nessa faixa — não corte conteúdo, não omita seções, mas seja direto e preciso: evite repetições, parágrafos prolixos, comentários HTML desnecessários e classes CSS não utilizadas. CSS compartilhado deve ser reutilizado via classes, não duplicado inline. Scripts devem ser concisos. Conteúdo textual deve ser denso em valor, não em volume.
+7. TAMANHO ALVO TOTAL: 48.000–55.000 caracteres. Orçamento por bloco — respeite rigorosamente:
+   • CSS + JS + estrutura base (head, sidebar, header): máx 13.000 chars
+   • Seção 01: máx 6.500 chars | Seção 02: máx 6.000 chars | Seção 03: máx 5.000 chars
+   • Seção 04: máx 5.500 chars | Seção 05: máx 4.500 chars
+   • Seção 06: máx 8.000 chars | Seção 07: máx 7.000 chars
+   Se perceber que está acima do orçamento de uma seção, encurte o texto corrido, reduza mensagens de script para 2 por cadência e simplifique tabelas — mas nunca omita seções.
+8. HTML COMPACTO: não use indentação excessiva no HTML gerado. CSS escrito em blocos concisos sem linha em branco entre regras. Sem comentários HTML. Sem classes CSS não usadas. Zero estilos inline duplicando o que já está em classe.
 
 ══════ PRINCÍPIOS DE DESIGN PREMIUM ══════
 Interface minimalista, sofisticada, moderna, clean, corporativa, alta legibilidade, sensação de tecnologia + consultoria premium.
@@ -378,22 +384,14 @@ Fundo escuro (#0x,#1x): surface rgba(255,255,255,.04), border rgba(255,255,255,.
   Número destaque (stat-value): font-variant-numeric:tabular-nums; font-feature-settings:"tnum"
   Uppercase labels (section badges, KPI labels): font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700; opacity:.7
 
-▸ ÍCONES SVG INLINE (obrigatório — NÃO usar ícone externo, emojis apenas em sidebar nav)
-  Cada section hero usa ícone SVG inline 48×48px com fill="none" stroke="currentColor" strokeWidth="1.5" — estilo Heroicons/Lucide outline.
-  Seção 01 👋: SVG casa/handshake. Seção 02 📊: SVG chart-bar. Seção 03 📦: SVG cube/package.
-  Seção 04 🎯: SVG crosshair/target. Seção 05 🗺️: SVG map/flow. Seção 06 💬: SVG message-circle. Seção 07 🏗️: SVG users/org-chart.
-  Envolver ícone em div .icon-wrap: display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:16px; background:var(--gradient-primary); color:#fff; box-shadow:var(--shadow-primary)
-  KPI cards: ícone 20×20 inline no canto superior direito, opacity:.6
+▸ ÍCONES DE SEÇÃO (emoji no .icon-wrap — NÃO gerar SVG paths inline)
+  Cada section hero usa o emoji da seção dentro do div.icon-wrap: font-size:1.8rem; display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:16px; background:var(--gradient-primary); box-shadow:var(--shadow-primary)
+  Emojis: S01→👋 S02→📊 S03→📦 S04→🎯 S05→🗺️ S06→💬 S07→🏗️
 
-▸ ANIMAÇÕES COREOGRAFADAS
-  Entrada de seção: cada .reveal entra com stagger — adicionar delay via nth-child (0ms, 80ms, 160ms, 240ms…).
-  Hero badge entrada: @keyframes badgePop { 0%{transform:scale(.6);opacity:0} 70%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} } — aplicar em .section-badge
-  Número counter: animar de 0 ao valor real via requestAnimationFrame com easing ease-out ao entrar no viewport.
-  Progress bar fill: entrar com width:0→valor real em 1.2s ease-out ao entrar viewport.
-  Card hover: transform:translateY(-4px) scale(1.01); box-shadow:var(--shadow-lg); transition:all .22s cubic-bezier(.22,.68,0,1.2)
-  Gradient border hover (cards premium): usar border:1px solid transparent; background:linear-gradient(var(--color-bg),var(--color-bg)) padding-box, var(--gradient-primary) border-box ao hover
-  Botão CTA pulse: @keyframes ctaPulse { 0%,100%{box-shadow:0 0 0 0 rgba(var(--primary-rgb),.4)} 60%{box-shadow:0 0 0 8px rgba(var(--primary-rgb),0)} } — aplicar em botão principal de cada seção
-  Sidebar item active: @keyframes slideRight { from{transform:translateX(-6px);opacity:0} to{transform:none;opacity:1} }
+▸ ANIMAÇÕES (apenas essenciais — sem keyframes extras)
+  .reveal: opacity:0; transform:translateY(18px); transition:opacity .5s ease, transform .5s ease → .visible: opacity:1; transform:none
+  Card hover: transform:translateY(-3px); box-shadow:var(--shadow-md); transition:all .2s ease
+  Número counter: requestAnimationFrame de 0→valor ao entrar no viewport via IntersectionObserver
 
 ▸ SCROLL EXPERIENCE
   Scrollbar customizada: ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(var(--primary-rgb),.3);border-radius:4px} ::-webkit-scrollbar-thumb:hover{background:rgba(var(--primary-rgb),.6)}
@@ -404,13 +402,6 @@ Fundo escuro (#0x,#1x): surface rgba(255,255,255,.04), border rgba(255,255,255,.
   Dot grid SVG background: background-image:radial-gradient(circle,rgba(var(--primary-rgb),.12) 1px,transparent 1px); background-size:24px 24px
   Estrutura hero: [.section-badge uppercase label primary] → [.icon-wrap 56px] → [h2 gradient-text clamp] → [p.hero-desc muted max-width:600px]
   Separador visual da seção após o hero: div height:1px; background:var(--gradient-border); opacity:.3; margin:0 -56px
-
-▸ DATA VISUALIZATION CSS/SVG PURO (sem bibliotecas externas)
-  Bar chart horizontal: divs com width:% animados, label à esquerda, valor à direita, barra com background:var(--gradient-primary); border-radius:0 4px 4px 0; height:10px
-  Donut / ring progress: SVG circle stroke-dasharray + stroke-dashoffset animado ao entrar viewport. r=40, cx=50, cy=50, viewBox="0 0 100 100"
-  Spark bar (mini chart em KPI): 7 divs inline-block height variável 4-20px; bar-gap:2px; mesmo gradiente primary
-  Funil de vendas: divs .funnel-level em coluna centralizada com clip-path:polygon para formato trapézio, cada nível com cor distinta e % animado
-  Termômetro de score: div vertical position:relative; fill animado de baixo p/ cima ao entrar viewport
 
 ▸ CARDS COM PROFUNDIDADE VISUAL
   Card principal: bg var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:24px 28px; box-shadow:var(--shadow-sm); overflow:hidden; position:relative
@@ -463,35 +454,26 @@ CSS OBRIGATÓRIO:
   .reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease} .reveal.visible{opacity:1;transform:none}
   body{padding-bottom:56px!important}
 
-JAVASCRIPT inline antes de </body>:
-  ① IntersectionObserver → item ativo sidebar (threshold:0.25) + smooth scroll
-  ② Counter animation em .stat-value ao entrar no viewport
+JAVASCRIPT inline antes de </body> (um único bloco compacto cobrindo):
+  ① IntersectionObserver unificado: sidebar active (threshold:0.25) + reveal .visible + counter animation em .stat-value
+  ② Hamburger toggle sidebar + overlay click fecha + ESC fecha
   ③ Botão "↑" flutuante após 300px scroll
-  ④ Reveal: IntersectionObserver em .reveal → .visible
-  ⑤ Hamburger + overlay + swipe: openSidebar/closeSidebar, touchstart/touchend (dx>60 da borda abre, dx<-60 fecha), ESC fecha
-  ⑥ Adicionar antes de </body>: <div id="vx-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:499;backdrop-filter:blur(2px)"></div>
-  ⑦ Accordion FAQ: clique no item → toggle open/close com animação height transition
-  ⑧ Botão "copiar" nos script blocks: navigator.clipboard.writeText(texto) + feedback visual "Copiado!"
+  ④ Accordions: querySelectorAll('.acc-header') → toggle open nas classes do header e body
+  ⑤ Copiar scripts: cada .btn-copy → clipboard.writeText + feedback "Copiado!" 2s
+  Escrever o JS de forma compacta — sem comentários, sem console.log, variáveis curtas.
 
 ══════ COMPONENTES PREMIUM OBRIGATÓRIOS ══════
-Hero section por seção: div.icon-wrap 56px gradient + .section-badge uppercase label + h2 gradient-text clamp + p.hero-desc muted + dot-grid background + separador gradiente após
-Stat cards: grid repeat(auto-fit,minmax(200px,1fr)); card com ::before accent line topo 3px gradient; stat-value clamp(1.8rem,4vw,2.6rem) gradient-text; label uppercase muted .7rem; ícone SVG 20px canto superior direito; box-shadow var(--shadow-sm); hover shadow-md + translateY(-4px)
-Tabelas: wrapper div.table-wrap border-radius:14px overflow-x:auto; thead gradient primary 100%; letra uppercase .8rem; tr:hover rgba primary .04; nth-child(even) rgba primary .015; td padding 12px 20px; sticky thead; border-radius 14px
-Script blocks: bg surface, border-left 4px primary, border-radius 0 12px 12px 0, badge canal emoji pill (📱WhatsApp/📧Email/📞Call/💬DM), font mono .9rem, label momento muted, BOTÃO "📋 Copiar" canto superior direito — navigator.clipboard + feedback "Copiado!" 2s
-Cards DEFA/AIDA/Pilares: grid 4 cols → 2 (≤900px) → 1 (≤560px); letra destaque gradient bg-clip:text; card ::before accent gradient topo 3px; hover gradient border via padding-box/border-box
-Timeline: horizontal desktop → vertical ≤768px; dot 12px bg primary box-shadow var(--shadow-primary); linha gradient primary→accent; cada ponto: nome bold + badge responsável + badge ferramenta + badge SLA + desc muted; stagger entrada reveal
-Progress bars: wrapper bg rgba primary .1 border-radius 999px height 8px; fill gradient primary→accent; animado width:0→valor ao entrar viewport 1.4s ease-out; label valor % à direita mono
-Checklists: ✓ circle 22px bg rgba(16,185,129,.12) border rgba(16,185,129,.3) ícone SVG check verde / ✗ circle 22px bg rgba(239,68,68,.10) border rgba(239,68,68,.25) ícone SVG x vermelho; item hover bg rgba primary .03
-Badges pill: sistema completo conforme DESIGN PREMIUM AVANÇADO — badge-ok/warn/alert/info/primary/neutral
-Glassmorphism (CTAs hero e cards destaque): bg rgba(255,255,255,.05) border 1px solid rgba(255,255,255,.10) backdrop-filter:blur(16px) border-radius:20px; dark mode only
-Quote blocks: border-left 4px var(--color-accent); bg rgba(var(--accent-rgb),.04); aspas decorativas " " font-size:4rem opacity:.15 position:absolute top:8px left:16px; padding:20px 24px 20px 48px
-Separadores de seção: div com badge circular nº primary 32px + linha gradient primary→transparent flex:1 height:1px ml:12px; margin-bottom:32px
-Espaçamento: entre seções 96px | sub-seções 56px | cards gap:20px | padding cards 24-32px
-Hover: translateY(-4px) scale(1.01) box-shadow var(--shadow-lg) transition all .22s cubic-bezier(.22,.68,0,1.2)
-Accordion: bg surface; header padding 18px 24px; chevron SVG rotativo 180deg; body max-height:0→9999px ease .4s; header.open border-bottom-radius:0; primeiro accordion aberto por padrão
-Funil visual: .funnel-level div com clip-path:polygon(5% 0%,95% 0%,100% 100%,0% 100%) ou calc via JS; cada nível altura 52px; gradiente de cores fase→fase; % e label overlay center; wrapper centralizado max-width:420px
-KPI Dashboard: grid cards; border-left 4px solid (cor semântica: azul/verde/âmbar/vermelho); bg surface; valor bold clamp(1.6rem,3vw,2rem); delta chip ↑/↓ com bg colorido; desc muted .8rem; ícone SVG 20px; hover shadow-md
-Bar chart CSS: .bar-chart div.bar-row (flex, label 120px, barra flex:1, valor 60px); div.bar fill width:% animated; height:10px border-radius:0 4px 4px 0; gradient primary→accent; tooltip data-val em ::after
+Hero section: .icon-wrap emoji 56px + .section-badge uppercase + h2 gradient-text clamp + p.hero-desc muted + dot-grid bg + separador 1px gradient após
+Stat cards: grid auto-fit minmax(180px,1fr); ::before accent top 3px gradient; stat-value gradient-text clamp(1.8rem,4vw,2.4rem); label uppercase muted .7rem; shadow-sm; hover shadow-md translateY(-3px)
+Tabelas: .table-wrap overflow-x:auto border-radius:12px; thead gradient primary; uppercase .8rem; tr:hover rgba primary .04; zebra rgba primary .015; td padding 12px 20px
+Script blocks: bg surface; border-left 4px primary; border-radius 0 12px 12px 0; badge canal emoji pill; font mono; BOTÃO "📋 Copiar" — clipboard + feedback "Copiado!"
+Cards pilares: grid 3-4 cols → 2 → 1; ::before accent 3px gradient topo; hover shadow-md
+Timeline: dot 10px bg primary; linha gradient; cada ponto nome bold + badge responsável + SLA + desc muted; vertical em ≤768px
+Checklists: ✓ span 22px bg rgba(16,185,129,.15) cor #059669 / ✗ span 22px bg rgba(239,68,68,.12) cor #dc2626
+Badges: badge-ok verde / badge-warn âmbar / badge-alert vermelho / badge-info azul / badge-primary / badge-neutral — conforme sistema definido
+Accordion: header clicável padding 18px 24px chevron rotativo; body max-height:0→9999px .4s; primeiro open por padrão
+Separadores: badge nº circular primary 28px + linha gradient flex; margin-bottom:28px
+Espaçamento: seções 80px | sub-seções 40px | cards gap:16px | padding 20-24px
 
 ══════ SISTEMA DE EDIÇÃO INLINE (obrigatório) ══════
 ① data-editable="true" + id único em TODOS: h1/h2/h3, p conteúdo, td/th, li, .script-text, .stat-value, blockquote p. NÃO marcar: sidebar, header, vx-edit-bar, decorativos.
@@ -1462,6 +1444,77 @@ REGRAS OBRIGATÓRIAS:
       else if (result.startsWith("```")) result = result.slice(3);
       if (result.endsWith("```")) result = result.slice(0, -3);
       return result.trim();
+    },
+
+    async enhanceDesign({ html, onStep, onToken }) {
+      if (!html) throw new Error("HTML do playbook não fornecido.");
+
+      onStep && onStep({ label: "Analisando design atual...", progress: 5 });
+
+      const ENHANCE_SYSTEM = `Você é um especialista em design front-end premium. Sua única tarefa é melhorar o design visual de um playbook HTML SEM alterar nenhum conteúdo textual.
+
+REGRAS ABSOLUTAS:
+1. Retorne APENAS o HTML completo, começando com <!DOCTYPE html>. Sem explicações.
+2. PRESERVE INTEGRALMENTE: todo texto visível, todos os atributos data-editable, todos os IDs, o sistema VX (vx-edit-bar, vx-toolbar, VXEditor IIFE), a sidebar, o header, a estrutura das 7 seções e os scripts de acordeão/copiar.
+3. NÃO adicione, remova nem modifique seções, títulos ou textos.
+4. NÃO altere a lógica JavaScript existente — apenas adicione CSS novo ou melhore o existente.
+
+O QUE MELHORAR (somente design visual):
+① CSS — refinar variáveis :root (sombras, gradientes, border-radius); melhorar hierarquia de elevação (box-shadow em 3 níveis: cards normais, cards hero, CTAs); adicionar gradiente de texto em h1/h2 de destaque via background-clip:text; melhorar tipografia (letter-spacing em labels uppercase, line-height em parágrafos, tabular-nums em números)
+② Animações CSS — adicionar/melhorar: .reveal com stagger via nth-child delay (0ms,80ms,160ms); hover em cards com translateY(-4px) scale(1.01) transition .22s cubic-bezier(.22,.68,0,1.2); progress bars animadas ao entrar viewport; counter animation em .stat-value
+③ Componentes — melhorar: cards com ::before accent line 3px gradient no topo; badges com border colorida semântica; tabelas com thead gradient; checklists com circle span colorido; script blocks com border-left mais proeminente; botões CTA com box-shadow do primary color
+④ Símbolos e decoração — section heroes: adicionar dot-grid (radial-gradient background-size:24px 24px) nas seções que não tiverem; separadores seção com badge circular + linha gradient; melhorar icon-wrap das seções (se já tiver emoji, adicionar shadow e gradient)
+⑤ Responsividade — revisar media queries e garantir que cards, tabelas e fluxogramas funcionem bem em mobile
+
+ESTRATÉGIA: leia o HTML atual, identifique o que está fraco visualmente, e aplique melhorias cirúrgicas no bloco <style> e, se necessário, complementos no bloco <script>. O HTML resultante deve ter qualidade visual claramente superior ao original.`;
+
+      const MILESTONES = [
+        { chars: 8000,  label: "Aprimorando CSS e variáveis..." },
+        { chars: 20000, label: "Refinando componentes e cards..." },
+        { chars: 35000, label: "Adicionando animações..." },
+        { chars: 48000, label: "Polindo layout e símbolos..." },
+      ];
+      let mIdx = 0;
+
+      onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 8 });
+
+      let { content: result } = await callAnthropic(
+        [
+          { role: "system", content: ENHANCE_SYSTEM },
+          { role: "user", content: "Aprimore o design visual deste playbook conforme as instruções. Retorne o HTML completo melhorado:\n\n" + html },
+        ],
+        (token, accumulated) => {
+          onToken && onToken(token, accumulated);
+          if (mIdx < MILESTONES.length && accumulated.length >= MILESTONES[mIdx].chars) {
+            const pct = Math.round((mIdx / MILESTONES.length) * 88) + 8;
+            onStep && onStep({ label: MILESTONES[mIdx].label, progress: pct });
+            mIdx++;
+          }
+        },
+        64000
+      );
+
+      onStep && onStep({ label: "Finalizando aprimoramento...", progress: 98 });
+
+      result = result.trim();
+      if (result.startsWith("```html")) result = result.slice(7);
+      else if (result.startsWith("```")) result = result.slice(3);
+      if (result.endsWith("```")) result = result.slice(0, -3);
+      result = result.trim();
+
+      if (!result.toLowerCase().includes("</html>")) {
+        const styleOpen  = (result.match(/<style[\s>]/gi) || []).length;
+        const styleClose = (result.match(/<\/style>/gi) || []).length;
+        if (styleOpen > styleClose) result += "\n</style>";
+        const scriptOpen  = (result.match(/<script[\s>]/gi) || []).length;
+        const scriptClose = (result.match(/<\/script>/gi) || []).length;
+        if (scriptOpen > scriptClose) result += "\n</script>";
+        if (!result.toLowerCase().includes("</body>")) result += "\n</body>";
+        result += "\n</html>";
+      }
+
+      onStep && onStep({ label: "Design aprimorado com sucesso!", progress: 100 });
+      return result;
     },
 
     async getDownloadUrl(playbookId, format) {
