@@ -1040,7 +1040,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
-      const { content: htmlContent, stopReason } = await callAnthropic(
+      let { content: htmlContent, stopReason } = await callAnthropic(
         [
           { role: "system", content: SYSTEM_PROMPT },
           {
