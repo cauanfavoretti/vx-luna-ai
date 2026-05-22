@@ -525,14 +525,19 @@ const FLOW_CANVAS_H = 500;
 const FLOW_DRAG_THRESHOLD = 5;
 
 const FLOW_NODES = {
-  timer:        { label: "Temporizador",    shape: "circle", fill: "#0f2a5e", stroke: "#3b82f6", w: 90,  h: 90  },
-  manual:       { label: "Ação Manual",     shape: "rect",   fill: "#0f2a5e", stroke: "#60a5fa", w: 148, h: 64  },
-  auto:         { label: "Automação",       shape: "penta",  fill: "#2e0a6e", stroke: "#a855f7", w: 148, h: 90  },
-  autoManual:   { label: "Auto c/ Gatilho", shape: "penta",  fill: "#0f2a5e", stroke: "#93c5fd", w: 148, h: 90  },
-  ifelse:       { label: "If / Else",       shape: "penta",  fill: "#5e0f0f", stroke: "#ef4444", w: 148, h: 90  },
-  clientAction: { label: "Ação do Cliente", shape: "rect",   fill: "#0f3320", stroke: "#4ade80", w: 148, h: 64  },
-  scheduling:   { label: "Agendamento",     shape: "circle", fill: "#1c150a", stroke: "#fbbf24", w: 90,  h: 90  },
+  timer:        { label: "Temporizador",    shape: "circle",  fill: "#0f2a5e", stroke: "#3b82f6", w: 90,  h: 90  },
+  manual:       { label: "Ação Manual",     shape: "rect",    fill: "#0f2a5e", stroke: "#60a5fa", w: 148, h: 64  },
+  auto:         { label: "Automação",       shape: "penta",   fill: "#2e0a6e", stroke: "#a855f7", w: 148, h: 90  },
+  autoManual:   { label: "Auto c/ Gatilho", shape: "penta",   fill: "#0f2a5e", stroke: "#93c5fd", w: 148, h: 90  },
+  ifelse:       { label: "If / Else",       shape: "penta",   fill: "#5e0f0f", stroke: "#ef4444", w: 148, h: 90  },
+  clientAction: { label: "Ação do Cliente", shape: "rect",    fill: "#0f3320", stroke: "#4ade80", w: 148, h: 64  },
+  scheduling:   { label: "Agendamento",     shape: "circle",  fill: "#1c150a", stroke: "#fbbf24", w: 90,  h: 90  },
+  personalizado:{ label: "Personalizado",   shape: "rect",    fill: "#1a0900", stroke: "#ff5b15", w: 148, h: 64  },
+  text:         { label: "Nota",            shape: "text",    fill: "#12100a", stroke: "#fbbf24", w: 170, h: 88  },
 };
+
+const TRIGGER_TYPES = ["manual", "auto", "autoManual", "clientAction", "scheduling", "personalizado"];
+const NODE_TYPES    = ["timer", "manual", "auto", "autoManual", "ifelse", "clientAction", "scheduling", "text"];
 
 const nodeSize = (node) => ({
   w: node.w || FLOW_NODES[node.type]?.w || 148,
@@ -570,6 +575,17 @@ function FlowShape({ type, w, h, sel }) {
       </svg>
     );
   }
+  if (d.shape === "text") {
+    const fold = 14;
+    return (
+      <svg width={w} height={h} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <polygon points={`${sw},${sw} ${w - fold},${sw} ${w - sw},${fold} ${w - sw},${h - sw} ${sw},${h - sw}`}
+          fill={d.fill} stroke={sc} strokeWidth={sw} />
+        <polyline points={`${w - fold},${sw} ${w - fold},${fold} ${w - sw},${fold}`}
+          fill="none" stroke={sc} strokeWidth={sw} opacity={0.5} />
+      </svg>
+    );
+  }
   return (
     <svg width={w} height={h} style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
       <polygon points={flowPentaPts(w, h, sw)} fill={d.fill} stroke={sc} strokeWidth={sw} />
@@ -585,12 +601,44 @@ function FlowPaletteIcon({ type }) {
     return <svg width={s} height={s} viewBox="0 0 13 13" style={{ flexShrink: 0 }}><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>;
   if (d.shape === "rect")
     return <svg width={s} height={s} viewBox="0 0 13 13" style={{ flexShrink: 0 }}><rect x="1" y="2.5" width="11" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>;
+  if (d.shape === "text")
+    return <svg width={s} height={s} viewBox="0 0 13 13" style={{ flexShrink: 0 }}><polygon points="1,1 10,1 12,3 12,12 1,12" fill="none" stroke="currentColor" strokeWidth="1.5"/><line x1="1" y1="1" x2="10" y2="1" stroke="currentColor" strokeWidth="1.5"/></svg>;
   return (
     <svg width={s} height={s} viewBox="0 0 13 13" style={{ flexShrink: 0 }}>
       <polygon points="6.5,1 12,4.5 10,12 3,12 1,4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
+
+const FLOW_IMPORT_PROMPT = `Analise esta imagem de fluxograma ou mapa de processo comercial. Extraia todos os blocos visíveis e suas conexões com setas.
+
+Retorne APENAS um objeto JSON neste formato exato (sem markdown, sem explicação):
+{
+  "nodes": [
+    { "id": "n1", "type": "manual", "x": 80, "y": 60, "label": "Nome do bloco" }
+  ],
+  "edges": [
+    { "id": "e1", "from": "n1", "to": "n2", "fromPort": null }
+  ]
+}
+
+Tipos disponíveis — escolha o mais adequado para cada bloco:
+• "timer"        → formas circulares, espera, tempo, delay
+• "manual"       → retângulos, ação humana/manual, tarefa
+• "auto"         → pentágonos, automação, sistema, CRM
+• "autoManual"   → pentágonos, etapa híbrida (humano + sistema)
+• "ifelse"       → decisão, condição, ramificação Sim/Não — nas edges de saída use fromPort: "sim" ou "nao"
+• "clientAction" → ação do cliente/prospect
+• "scheduling"   → agendamento, calendário, reunião
+• "personalizado"→ bloco inicial personalizado, webhook, evento, gatilho
+• "text"         → anotação, nota, legenda, comentário
+
+Para blocos que iniciam o fluxo (o primeiro bloco, ou um gatilho/trigger), adicione "isTrigger": true no nó.
+Posicionamento: use coordenadas x/y em pixels respeitando o layout original da imagem.
+Canvas destino: ~700px largura × ~500px altura. Escale proporcionalmente.
+Espaço entre nós: pelo menos 30px. Largura padrão dos nós: ~150px.
+
+Retorne SOMENTE o JSON. Nenhum texto antes ou depois.`;
 
 function FlowBuilder({ field, value, onChange }) {
   const norm = (v) =>
@@ -600,12 +648,17 @@ function FlowBuilder({ field, value, onChange }) {
   const data = norm(value);
 
   /* ── React state (drive re-renders) ── */
-  const [selected,    setSelected]    = useState(null);
-  const [editingId,   setEditingId]   = useState(null);
-  const [hovered,     setHovered]     = useState(null);
-  const [pending,     setPending]     = useState(null);       // { fromId }
-  const [pendingMouse,setPendingMouse]= useState(null);       // { x, y } canvas-relative
-  const [isDragging,  setIsDragging]  = useState(false);
+  const [selected,     setSelected]    = useState(null);
+  const [editingId,    setEditingId]   = useState(null);
+  const [hovered,      setHovered]     = useState(null);
+  const [pending,      setPending]     = useState(null);       // { fromId }
+  const [pendingMouse, setPendingMouse]= useState(null);       // { x, y } canvas-relative
+  const [isDragging,        setIsDragging]       = useState(false);
+  const [isFullscreen,      setIsFullscreen]     = useState(false);
+  const [isAnalyzing,       setIsAnalyzing]      = useState(false);
+  const [showTriggerPicker, setShowTriggerPicker]= useState(false);
+
+  const canvasH = isFullscreen ? Math.max(400, window.innerHeight - 180) : FLOW_CANVAS_H;
 
   /* ── Refs (used inside always-on effect) ── */
   const canvasRef    = useRef(null);
@@ -622,13 +675,16 @@ function FlowBuilder({ field, value, onChange }) {
   const emit = (patch) => cbRef.current({ ...dataRef.current, ...patch });
 
   /* ── Node operations ── */
-  const addNode = (type) => {
+  const addNode = (type, isTrigger = false) => {
     const def = FLOW_NODES[type];
     const id  = "n" + Date.now().toString(36);
-    const cw  = canvasRef.current ? canvasRef.current.clientWidth : 700;
+    const cw  = canvasRef.current ? canvasRef.current.clientWidth  : 700;
+    const ch  = canvasRef.current ? canvasRef.current.clientHeight : canvasH;
     const x   = Math.max(20, Math.min(cw - def.w - 20, cw / 2 - def.w / 2 + (Math.random() - 0.5) * 180));
-    const y   = 24 + Math.random() * (FLOW_CANVAS_H - def.h - 60);
-    emit({ nodes: [...dataRef.current.nodes, { id, type, x, y, label: def.label }] });
+    const y   = 24 + Math.random() * Math.max(0, ch - def.h - 60);
+    const newNode = { id, type, x, y, label: def.label };
+    if (isTrigger) newNode.isTrigger = true;
+    emit({ nodes: [...dataRef.current.nodes, newNode] });
   };
 
   const resizeNode = (id, factor) => {
@@ -655,6 +711,72 @@ function FlowBuilder({ field, value, onChange }) {
   const deleteEdge = (id) =>
     emit({ edges: dataRef.current.edges.filter((e) => e.id !== id) });
 
+  const importInputRef = useRef(null);
+
+  const importFromImage = async (file) => {
+    if (!file) return;
+    const key = window.VX_API?.getKey();
+    if (!key) { alert("Configure sua API key antes de importar."); return; }
+    setIsAnalyzing(true);
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = (e) => res(e.target.result.split(",")[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const mediaType = file.type || "image/jpeg";
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 2048,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+              { type: "text", text: FLOW_IMPORT_PROMPT },
+            ],
+          }],
+        }),
+      });
+      if (!resp.ok) throw new Error("Erro na API: " + resp.status);
+      const result = await resp.json();
+      const raw = result.content?.[0]?.text || "";
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("IA não retornou JSON válido");
+      const flowData = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(flowData.nodes)) throw new Error("Estrutura de nodes inválida");
+      const idMap = {};
+      const ts = Date.now().toString(36);
+      const nodes = flowData.nodes.map((n, i) => {
+        const newId = "n" + ts + i;
+        idMap[n.id] = newId;
+        const type = n.type in FLOW_NODES ? n.type : "manual";
+        const node = { id: newId, type, x: Number(n.x) || 40 + (i % 4) * 170, y: Number(n.y) || 40 + Math.floor(i / 4) * 120, label: n.label || FLOW_NODES[type].label };
+        if (n.isTrigger) node.isTrigger = true;
+        return node;
+      });
+      const edges = (flowData.edges || []).map((e, i) => ({
+        id: "e" + ts + i,
+        from: idMap[e.from] || "",
+        to:   idMap[e.to]   || "",
+        fromPort: e.fromPort || null,
+      })).filter((e) => e.from && e.to);
+      emit({ nodes, edges });
+    } catch (err) {
+      alert("Erro ao importar: " + (err.message || String(err)));
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   /* ── Single always-on global effect ── */
   useEffect(() => {
     const onMove = (e) => {
@@ -674,7 +796,8 @@ function FlowBuilder({ field, value, onChange }) {
         const d    = dataRef.current;
         const cw   = canvasRef.current ? canvasRef.current.clientWidth : 800;
         const nx   = Math.max(0, Math.min(cw - drag.nw, drag.x0 + e.clientX - drag.cx0));
-        const ny   = Math.max(0, Math.min(FLOW_CANVAS_H - drag.nh, drag.y0 + e.clientY - drag.cy0));
+        const ch   = canvasRef.current ? canvasRef.current.clientHeight : FLOW_CANVAS_H;
+        const ny   = Math.max(0, Math.min(ch - drag.nh, drag.y0 + e.clientY - drag.cy0));
         cbRef.current({ ...d, nodes: d.nodes.map((n) => n.id === drag.id ? { ...n, x: nx, y: ny } : n) });
       }
       /* Pending edge → track mouse on canvas */
@@ -717,6 +840,8 @@ function FlowBuilder({ field, value, onChange }) {
         setPendingMouse(null);
         setSelected(null);
         setEditingId(null);
+        setShowTriggerPicker(false);
+        setIsFullscreen(false);
       }
     };
 
@@ -787,6 +912,7 @@ function FlowBuilder({ field, value, onChange }) {
       if (pendingRef.current) { pendingRef.current = null; setPending(null); setPendingMouse(null); return; }
       setSelected(null);
       setEditingId(null);
+      setShowTriggerPicker(false);
     }
   };
 
@@ -831,63 +957,90 @@ function FlowBuilder({ field, value, onChange }) {
     return <path d={dp} stroke="rgba(255,91,21,0.65)" strokeWidth={1.5} fill="none" strokeDasharray="6,3" />;
   })() : null;
 
-  return (
-    <FieldShell field={field}>
+  const btnBase = { display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", borderRadius: 999, cursor: "pointer", fontFamily: "var(--mono)", fontSize: 10, transition: "all .15s", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--muted)" };
 
-      {/* Palette */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
-        {Object.entries(FLOW_NODES).map(([type, def]) => (
-          <button key={type} type="button" onClick={() => addNode(type)}
-            style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "5px 12px",
-              borderRadius: 999, cursor: "pointer", transition: "background .15s",
-              background: def.fill + "99", color: def.stroke, border: `1px solid ${def.stroke}55`,
-              fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.04em",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = def.fill + "ee"}
-            onMouseLeave={(e) => e.currentTarget.style.background = def.fill + "99"}
-          >
-            <FlowPaletteIcon type={type} />{def.label}
-          </button>
-        ))}
-        {data.nodes.length > 0 && (
-          <button type="button"
-            onClick={() => { emit({ nodes: [], edges: [] }); setSelected(null); setEditingId(null); pendingRef.current = null; setPending(null); }}
-            style={{
-              marginLeft: "auto", padding: "5px 10px", borderRadius: 999, cursor: "pointer",
-              background: "transparent", border: "1px solid var(--border-strong)",
-              color: "var(--muted-2)", fontFamily: "var(--mono)", fontSize: 10, transition: "all .15s",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#ef4444"; e.currentTarget.style.borderColor = "rgba(239,68,68,0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--muted-2)"; e.currentTarget.style.borderColor = "var(--border-strong)"; }}
-          >limpar tudo</button>
-        )}
+  const IcnImport = () => <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+  const IcnSpin  = () => <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ animation: "spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
+  const IcnMin   = () => <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>;
+  const IcnMax   = () => <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>;
+
+  const PaletteBar = ({ inPortal }) => {
+    const nodeBtn = (type, isTrigger) => {
+      const def = FLOW_NODES[type];
+      return (
+        <button key={type} type="button" onClick={() => { addNode(type, isTrigger); if (isTrigger) setShowTriggerPicker(false); }}
+          style={{
+            display: "flex", alignItems: "center", gap: 6, padding: "5px 11px",
+            borderRadius: 999, cursor: "pointer", transition: "background .15s",
+            background: def.fill + "99", color: def.stroke, border: `1px solid ${def.stroke}55`,
+            fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.04em",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = def.fill + "ee"}
+          onMouseLeave={(e) => e.currentTarget.style.background = def.fill + "99"}
+        >
+          <FlowPaletteIcon type={type} />{def.label}
+        </button>
+      );
+    };
+    return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {/* TRIGGER row */}
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "#f97316", letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 2 }}>⚡ TRIGGER</span>
+        {TRIGGER_TYPES.map((type) => nodeBtn(type, true))}
       </div>
-
-      {pending && (
-        <div style={{
-          marginBottom: 8, padding: "5px 14px", borderRadius: 6,
-          background: "rgba(255,91,21,0.08)", border: "1px solid rgba(255,91,21,0.3)",
-          fontFamily: "var(--mono)", fontSize: 10, color: "var(--orange)",
-          display: "flex", alignItems: "center", gap: 8,
-        }}>
-          <span>⬤</span> Arraste até o bloco destino · ESC cancela
+      {/* NODES row */}
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 2 }}>NODES</span>
+        {NODE_TYPES.map((type) => nodeBtn(type, false))}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 5, alignItems: "center" }}>
+          <button type="button"
+            onClick={() => importInputRef.current?.click()}
+            disabled={isAnalyzing}
+            style={{ ...btnBase, color: isAnalyzing ? "var(--muted-2)" : "#a78bfa", borderColor: isAnalyzing ? "var(--border)" : "rgba(167,139,250,0.45)" }}
+            onMouseEnter={(e) => { if (!isAnalyzing) { e.currentTarget.style.color = "#c4b5fd"; e.currentTarget.style.background = "rgba(167,139,250,0.08)"; } }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = isAnalyzing ? "var(--muted-2)" : "#a78bfa"; e.currentTarget.style.background = "transparent"; }}
+            title="Importar fluxograma de imagem — IA reconstrói os blocos"
+          >
+            {isAnalyzing ? <IcnSpin /> : <IcnImport />}
+            {isAnalyzing ? "analisando…" : "importar imagem"}
+          </button>
+          <button type="button"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            style={{ ...btnBase, color: "var(--orange)", borderColor: "rgba(255,91,21,0.45)", background: inPortal ? "rgba(255,91,21,0.08)" : "transparent" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,91,21,0.14)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = inPortal ? "rgba(255,91,21,0.08)" : "transparent"; }}
+            title={isFullscreen ? "Minimizar (ESC)" : "Expandir tela cheia"}
+          >
+            {isFullscreen ? <IcnMin /> : <IcnMax />}
+            {isFullscreen ? "minimizar" : "expandir"}
+          </button>
+          {data.nodes.length > 0 && (
+            <button type="button"
+              onClick={() => { emit({ nodes: [], edges: [] }); setSelected(null); setEditingId(null); pendingRef.current = null; setPending(null); setShowTriggerPicker(false); }}
+              style={btnBase}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#ef4444"; e.currentTarget.style.borderColor = "rgba(239,68,68,0.5)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--muted)"; e.currentTarget.style.borderColor = "var(--border-strong)"; }}
+            >limpar</button>
+          )}
         </div>
-      )}
+      </div>
+    </div>
+    );
+  };
 
-      {/* Canvas */}
-      <div
-        ref={canvasRef}
-        onMouseDown={onCanvasDown}
-        style={{
-          position: "relative", width: "100%", height: FLOW_CANVAS_H,
-          background: "#080706",
-          border: `1px solid ${pending ? "rgba(255,91,21,0.4)" : (selected ? "var(--border-strong)" : "var(--border)")}`,
-          borderRadius: 10,
-          cursor: pending ? "crosshair" : "default",
-          transition: "border-color .2s",
-        }}
-      >
+  const canvasStyle = (full) => ({
+    position: "relative", width: "100%",
+    ...(full ? { flex: "1 1 0", minHeight: 0 } : { height: FLOW_CANVAS_H }),
+    background: "#080706",
+    border: `1px solid ${pending ? "rgba(255,91,21,0.4)" : selected ? "var(--border-strong)" : "var(--border)"}`,
+    borderRadius: full ? 0 : 10,
+    cursor: pending ? "crosshair" : "default",
+    transition: "border-color .2s",
+  });
+
+  const canvasEl = (
+    <div ref={canvasRef} onMouseDown={onCanvasDown} style={canvasStyle(isFullscreen)}>
         {/* SVG overlay: grid + edges */}
         <svg width="100%" height="100%"
           style={{ position: "absolute", inset: 0, zIndex: 1, overflow: "visible" }}
@@ -932,6 +1085,16 @@ function FlowBuilder({ field, value, onChange }) {
               }}
             >
               <FlowShape type={node.type} w={ns.w} h={ns.h} sel={isSel} />
+
+              {/* Trigger badge */}
+              {node.isTrigger && (
+                <div style={{
+                  position: "absolute", top: -9, left: "50%", transform: "translateX(-50%)",
+                  background: "#f97316", color: "#0a0907", borderRadius: 4, padding: "1px 6px",
+                  fontFamily: "var(--mono)", fontSize: 7, fontWeight: 700, letterSpacing: "0.1em",
+                  zIndex: 6, pointerEvents: "none", whiteSpace: "nowrap",
+                }}>⚡ TRIGGER</div>
+              )}
 
               {/* Label — static or editable */}
               {isEdit ? (
@@ -1086,62 +1249,532 @@ function FlowBuilder({ field, value, onChange }) {
           );
         })}
 
-        {/* Empty state */}
-        {data.nodes.length === 0 && (
+        {/* n8n-style trigger add button — shown when no trigger node exists */}
+        {data.nodes.filter((n) => n.isTrigger).length === 0 && (
           <div style={{
-            position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
+            position: "absolute",
+            left: "50%",
+            top: data.nodes.length === 0 ? "50%" : 32,
+            transform: data.nodes.length === 0 ? "translate(-50%, -50%)" : "translateX(-50%)",
+            zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
           }}>
-            <svg width="44" height="44" viewBox="0 0 44 44" style={{ opacity: 0.15 }}>
-              <polygon points="22,2 42,14 35,40 9,40 2,14" fill="none" stroke="#ff5b15" strokeWidth="1.5"/>
-              <circle cx="22" cy="22" r="10" fill="none" stroke="#3b82f6" strokeWidth="1.5"/>
-            </svg>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted-2)", letterSpacing: "0.08em" }}>
-              Clique nos tipos acima para adicionar blocos
+            <button type="button"
+              onClick={(e) => { e.stopPropagation(); setShowTriggerPicker((v) => !v); }}
+              style={{
+                width: 76, height: 76, borderRadius: "50%",
+                border: "2px dashed #f97316", background: "rgba(249,115,22,0.06)",
+                cursor: "pointer", display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center", gap: 3,
+                color: "#f97316", transition: "background .15s, border-color .15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(249,115,22,0.14)"; e.currentTarget.style.borderColor = "#fb923c"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(249,115,22,0.06)"; e.currentTarget.style.borderColor = "#f97316"; }}
+            >
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "#f97316", letterSpacing: "0.12em", textTransform: "uppercase", pointerEvents: "none" }}>
+              ⚡ trigger
             </div>
+            {showTriggerPicker && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+                background: "var(--surface)", border: "1px solid var(--border-strong)",
+                borderRadius: 10, padding: "12px 14px", zIndex: 20, minWidth: 210,
+                boxShadow: "0 12px 36px rgba(0,0,0,0.75)",
+                display: "flex", flexDirection: "column", gap: 5,
+              }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "#f97316", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 4 }}>⚡ Escolha o trigger</div>
+                {TRIGGER_TYPES.map((type) => {
+                  const def = FLOW_NODES[type];
+                  return (
+                    <button key={type} type="button"
+                      onClick={(e) => { e.stopPropagation(); addNode(type, true); setShowTriggerPicker(false); }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8, padding: "7px 12px",
+                        borderRadius: 7, cursor: "pointer", transition: "background .12s",
+                        background: def.fill + "88", color: def.stroke, border: `1px solid ${def.stroke}44`,
+                        fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.04em", textAlign: "left",
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = def.fill + "dd"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = def.fill + "88"}
+                    >
+                      <FlowPaletteIcon type={type} /> {def.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
+  );  /* end canvasEl */
 
-      {/* Status */}
-      {data.nodes.length > 0 && (
-        <div style={{ marginTop: 5, fontFamily: "var(--mono)", fontSize: 9, color: "var(--muted-2)", letterSpacing: "0.05em" }}>
-          {data.nodes.length} bloco{data.nodes.length !== 1 ? "s" : ""} · {data.edges.length} conexão{data.edges.length !== 1 ? "ões" : ""} · clique = selecionar · clique 2× = editar texto · ⬤ porta direita = arrastar conexão · if/else tem porta Sim (verde) e Não (vermelho) · − / + = redimensionar · linha = clique para apagar
-        </div>
-      )}
+  const fileInputEl = (
+    <input ref={importInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+      style={{ display: "none" }}
+      onChange={(e) => { const f = e.target.files?.[0]; if (f) importFromImage(f); e.target.value = ""; }} />
+  );
 
-      {/* Description textarea */}
-      <div style={{ marginTop: 14 }}>
-        <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 8 }}>
-          › Descrição detalhada do fluxo
-        </div>
-        <textarea
-          rows={3}
-          value={data.description}
-          onChange={(e) => emit({ description: e.target.value })}
-          placeholder="Explique com mais detalhes: timing entre etapas, condições do If/Else, responsáveis, SLAs, exceções, integrações e qualquer contexto que ajude a IA a entender o processo..."
-          style={{
-            ...fieldStyles.textarea,
-            fontFamily: "var(--display)", fontSize: 13, lineHeight: 1.6,
-          }}
-        />
+  const pendingBannerJSX = pending ? (
+    <div style={{ marginTop: 8, padding: "5px 14px", borderRadius: 6, background: "rgba(255,91,21,0.08)", border: "1px solid rgba(255,91,21,0.3)", fontFamily: "var(--mono)", fontSize: 10, color: "var(--orange)", display: "flex", alignItems: "center", gap: 8 }}>
+      <span>⬤</span> Arraste até o bloco destino · ESC cancela
+    </div>
+  ) : null;
+
+  const statusJSX = data.nodes.length > 0 ? (
+    <div style={{ padding: "5px 0 0", fontFamily: "var(--mono)", fontSize: 9, color: "var(--muted-2)", letterSpacing: "0.05em" }}>
+      {data.nodes.length} bloco{data.nodes.length !== 1 ? "s" : ""} · {data.edges.length} conexão{data.edges.length !== 1 ? "ões" : ""} · clique = selecionar · 2× = editar · ⬤ porta = conexão · if/else: Sim (verde) Não (vermelho) · −/+ = tamanho · linha = apagar
+    </div>
+  ) : null;
+
+  const descJSX = (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 6 }}>
+        › Descrição detalhada do fluxo
       </div>
+      <textarea rows={3} value={data.description} onChange={(e) => emit({ description: e.target.value })}
+        placeholder="Explique com mais detalhes: timing entre etapas, condições do If/Else, responsáveis, SLAs, exceções, integrações e qualquer contexto que ajude a IA a entender o processo..."
+        style={{ ...fieldStyles.textarea, fontFamily: "var(--display)", fontSize: 13, lineHeight: 1.6 }}
+      />
+    </div>
+  );
 
-    </FieldShell>
+  if (!isFullscreen) {
+    return (
+      <FieldShell field={field}>
+        <PaletteBar />
+        {fileInputEl}
+        {pendingBannerJSX}
+        {canvasEl}
+        {statusJSX}
+        {descJSX}
+      </FieldShell>
+    );
+  }
+
+  return (
+    <>
+      <FieldShell field={field}>
+        {fileInputEl}
+        <div style={{ padding: "8px 0", fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+          ↑ Fluxograma expandido em tela cheia — ESC ou "minimizar" para fechar
+        </div>
+      </FieldShell>
+      {ReactDOM.createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--bg)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ flexShrink: 0, padding: "12px 18px 10px", background: "var(--bg-2)", borderBottom: "1px solid var(--border)" }}>
+            <PaletteBar inPortal />
+            {pendingBannerJSX}
+          </div>
+          {canvasEl}
+          <div style={{ flexShrink: 0, padding: "8px 18px 14px", background: "var(--bg-2)", borderTop: "1px solid var(--border)" }}>
+            {statusJSX}
+            {descJSX}
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 
-function Field({ field, value, onChange }) {
+/* ───────────────────────── GROUP HEADER ───────────────────────── */
+
+function GroupHeader({ field }) {
+  return (
+    <div style={{
+      paddingTop: 8, paddingBottom: 2,
+      borderTop: "1px solid var(--border)",
+      fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.18em",
+      textTransform: "uppercase", color: "var(--orange)",
+      display: "flex", alignItems: "center", gap: 8,
+    }}>
+      <span>✦</span>
+      {field.label}
+    </div>
+  );
+}
+
+/* ───────────────────────── PRODUCT CARD ───────────────────────── */
+
+function ProductCard({ num, produto, onChange, onRemove }) {
+  const [open, setOpen] = useState(true);
+
+  const inp = {
+    width: "100%", background: "transparent", color: "var(--ink)",
+    border: "none", borderBottom: "1px solid var(--border-strong)",
+    padding: "8px 0", fontSize: 14, fontFamily: "var(--display)",
+    transition: "border-color .15s", outline: "none",
+  };
+  const ta = {
+    width: "100%", background: "var(--surface)", color: "var(--ink)",
+    border: "1px solid var(--border)", borderRadius: 8,
+    padding: "10px 12px", fontSize: 13, lineHeight: 1.55,
+    fontFamily: "var(--display)", resize: "vertical", minHeight: 60,
+    transition: "border-color .15s, background .15s", outline: "none",
+  };
+  const lbl = {
+    fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)",
+    letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6,
+  };
+
+  return (
+    <div style={{ border: "1px solid var(--border-strong)", borderRadius: 12, overflow: "hidden" }}>
+      {/* Header */}
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "13px 16px", background: "var(--surface)", cursor: "pointer",
+          borderBottom: open ? "1px solid var(--border)" : "none",
+          userSelect: "none",
+        }}
+      >
+        <span style={{
+          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+          background: "rgba(255,91,21,0.12)", color: "var(--orange)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "var(--mono)", fontSize: 11, fontWeight: 700,
+        }}>{String(num).padStart(2, "0")}</span>
+
+        <div style={{
+          flex: 1, fontFamily: "var(--display)", fontSize: 14, fontWeight: 600,
+          color: produto.nome ? "var(--ink)" : "var(--muted)",
+        }}>
+          {produto.nome || `Produto / Serviço ${num}`}
+        </div>
+
+        <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="var(--muted)"
+          strokeWidth={2.2} strokeLinecap="round" style={{
+            flexShrink: 0,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform .2s",
+          }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          style={{
+            width: 26, height: 26, background: "transparent", border: "none",
+            color: "var(--muted-2)", cursor: "pointer", flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            borderRadius: 6, transition: "all .15s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "#f87171"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--muted-2)"; }}
+          title="Remover produto"
+        ><Icon name="x" size={12} /></button>
+      </div>
+
+      {/* Body */}
+      {open && (
+        <div style={{ padding: "18px 16px 20px", background: "var(--bg-2)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Nome do produto / serviço</div>
+              <input type="text" value={produto.nome || ""} onChange={(e) => onChange("nome", e.target.value)}
+                placeholder="ex.: Consultoria Completa, Plano Pro, Tratamento X"
+                style={inp}
+                onFocus={(e) => { e.target.style.borderBottomColor = "var(--orange)"; }}
+                onBlur={(e)  => { e.target.style.borderBottomColor = "var(--border-strong)"; }}
+              />
+            </div>
+
+            <div>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Preço / Investimento</div>
+              <input type="text" value={produto.preco || ""} onChange={(e) => onChange("preco", e.target.value)}
+                placeholder="ex.: R$ 2.500/mês, A partir de R$ 8.000"
+                style={inp}
+                onFocus={(e) => { e.target.style.borderBottomColor = "var(--orange)"; }}
+                onBlur={(e)  => { e.target.style.borderBottomColor = "var(--border-strong)"; }}
+              />
+            </div>
+
+            <div>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Para quem é</div>
+              <input type="text" value={produto.para_quem || ""} onChange={(e) => onChange("para_quem", e.target.value)}
+                placeholder="ex.: PMEs de 50+ colaboradores, Clínicas em expansão"
+                style={inp}
+                onFocus={(e) => { e.target.style.borderBottomColor = "var(--orange)"; }}
+                onBlur={(e)  => { e.target.style.borderBottomColor = "var(--border-strong)"; }}
+              />
+            </div>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> O que está incluído / entregáveis</div>
+              <textarea value={produto.descricao || ""} onChange={(e) => onChange("descricao", e.target.value)}
+                rows={3}
+                placeholder="O que o cliente recebe — entregáveis, acesso, formato, prazo, transformação"
+                style={ta}
+                onFocus={(e) => { e.target.style.borderColor = "var(--orange)"; e.target.style.background = "var(--surface-2)"; }}
+                onBlur={(e)  => { e.target.style.borderColor = "var(--border)"; e.target.style.background = "var(--surface)"; }}
+              />
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ───────────────────────── PRODUCTS REPEATER ───────────────────────── */
+
+function Products({ field, value, onChange }) {
+  const lista = Array.isArray(value) ? value : [];
+
+  const addProduct = () => onChange([...lista, { nome: "", descricao: "", preco: "", para_quem: "" }]);
+  const updateProduct = (idx, key, val) => onChange(lista.map((p, i) => i === idx ? { ...p, [key]: val } : p));
+  const removeProduct = (idx) => onChange(lista.filter((_, i) => i !== idx));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {lista.length === 0 && (
+        <div style={{
+          padding: "32px", textAlign: "center",
+          border: "1px solid var(--border)", borderRadius: 12,
+          background: "var(--surface)",
+        }}>
+          <div style={{ fontFamily: "var(--display)", fontSize: 14, color: "var(--muted)", marginBottom: 4 }}>
+            Nenhum produto adicionado ainda
+          </div>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+            Clique em "+" abaixo para começar
+          </div>
+        </div>
+      )}
+
+      {lista.map((produto, i) => (
+        <ProductCard
+          key={i}
+          num={i + 1}
+          produto={produto}
+          onChange={(key, val) => updateProduct(i, key, val)}
+          onRemove={() => removeProduct(i)}
+        />
+      ))}
+
+      <button
+        type="button"
+        onClick={addProduct}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          padding: "13px", borderRadius: 10, background: "transparent",
+          border: "1.5px dashed var(--border-strong)",
+          color: "var(--muted)", fontFamily: "var(--display)", fontSize: 13,
+          cursor: "pointer", transition: "all .15s",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.color = "var(--orange)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.color = "var(--muted)"; }}
+      >
+        <Icon name="plus" size={14} stroke="currentColor" />
+        {lista.length === 0 ? "Adicionar produto / serviço" : `Adicionar produto ${lista.length + 1}`}
+      </button>
+    </div>
+  );
+}
+
+/* ───────────────────────── ICP POR PRODUTO ───────────────────────── */
+
+function IcpProductCard({ num, nomeProduto, subtitleProduto, icpData, onChange, defaultOpen }) {
+  const [open, setOpen] = useState(!!defaultOpen);
+
+  const ta = {
+    width: "100%", background: "var(--surface)", color: "var(--ink)",
+    border: "1px solid var(--border)", borderRadius: 8,
+    padding: "10px 12px", fontSize: 13, lineHeight: 1.55,
+    fontFamily: "var(--display)", resize: "vertical", minHeight: 60,
+    transition: "border-color .15s, background .15s", outline: "none",
+  };
+  const inp = {
+    width: "100%", background: "transparent", color: "var(--ink)",
+    border: "none", borderBottom: "1px solid var(--border-strong)",
+    padding: "8px 0", fontSize: 14, fontFamily: "var(--display)",
+    transition: "border-color .15s", outline: "none",
+  };
+  const lbl = {
+    fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)",
+    letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6,
+  };
+
+  return (
+    <div style={{ border: "1px solid var(--border-strong)", borderRadius: 12, overflow: "hidden" }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "13px 16px", background: "var(--surface)", cursor: "pointer",
+          borderBottom: open ? "1px solid var(--border)" : "none",
+          userSelect: "none",
+        }}
+      >
+        <span style={{
+          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+          background: "rgba(255,91,21,0.12)", color: "var(--orange)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "var(--mono)", fontSize: 11, fontWeight: 700,
+        }}>{String(num).padStart(2, "0")}</span>
+
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>
+            {nomeProduto}
+          </div>
+          {subtitleProduto && (
+            <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--muted)", letterSpacing: "0.06em", marginTop: 2 }}>
+              {subtitleProduto}
+            </div>
+          )}
+        </div>
+
+        <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="var(--muted)"
+          strokeWidth={2.2} strokeLinecap="round" style={{
+            flexShrink: 0,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform .2s",
+          }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+
+      {open && (
+        <div style={{ padding: "18px 16px 20px", background: "var(--bg-2)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+
+            <div>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Segmento / setor</div>
+              <input type="text" value={icpData.segmento || ""}
+                onChange={(e) => onChange("segmento", e.target.value)}
+                placeholder="ex.: PMEs de tecnologia, Clínicas odontológicas"
+                style={inp}
+                onFocus={(e) => { e.target.style.borderBottomColor = "var(--orange)"; }}
+                onBlur={(e)  => { e.target.style.borderBottomColor = "var(--border-strong)"; }}
+              />
+            </div>
+
+            <div>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Ticket médio</div>
+              <input type="text" value={icpData.ticket || ""}
+                onChange={(e) => onChange("ticket", e.target.value)}
+                placeholder="ex.: R$ 3.000–8.000/mês"
+                style={inp}
+                onFocus={(e) => { e.target.style.borderBottomColor = "var(--orange)"; }}
+                onBlur={(e)  => { e.target.style.borderBottomColor = "var(--border-strong)"; }}
+              />
+            </div>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Quem compra este produto?</div>
+              <textarea value={icpData.icp_desc || ""}
+                onChange={(e) => onChange("icp_desc", e.target.value)}
+                rows={3}
+                placeholder="Cargo, contexto, empresa, momento de vida — perfil do decisor ou influenciador que fecha este produto"
+                style={ta}
+                onFocus={(e) => { e.target.style.borderColor = "var(--orange)"; e.target.style.background = "var(--surface-2)"; }}
+                onBlur={(e)  => { e.target.style.borderColor = "var(--border)"; e.target.style.background = "var(--surface)"; }}
+              />
+            </div>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Dor principal + gatilhos de urgência</div>
+              <textarea value={icpData.dor_urgencia || ""}
+                onChange={(e) => onChange("dor_urgencia", e.target.value)}
+                rows={2}
+                placeholder="Qual dor este produto resolve? O que faz o cliente agir agora?"
+                style={ta}
+                onFocus={(e) => { e.target.style.borderColor = "var(--orange)"; e.target.style.background = "var(--surface-2)"; }}
+                onBlur={(e)  => { e.target.style.borderColor = "var(--border)"; e.target.style.background = "var(--surface)"; }}
+              />
+            </div>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <div style={lbl}><span style={{ color: "var(--orange)" }}>›</span> Critérios de qualificação</div>
+              <textarea value={icpData.qualifica || ""}
+                onChange={(e) => onChange("qualifica", e.target.value)}
+                rows={2}
+                placeholder="O que confirma que é o cliente certo para este produto? E o que desqualifica?"
+                style={ta}
+                onFocus={(e) => { e.target.style.borderColor = "var(--orange)"; e.target.style.background = "var(--surface-2)"; }}
+                onBlur={(e)  => { e.target.style.borderColor = "var(--border)"; e.target.style.background = "var(--surface)"; }}
+              />
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function IcpProducts({ field, value, onChange, allData }) {
+  const produtos = Array.isArray(allData?.produtos?.lista)
+    ? allData.produtos.lista.filter((p) => p.nome && p.nome.trim())
+    : [];
+
+  if (produtos.length === 0) {
+    return (
+      <div style={{
+        padding: "32px", textAlign: "center",
+        border: "1px solid var(--border)", borderRadius: 12,
+        background: "var(--surface)",
+      }}>
+        <div style={{ fontFamily: "var(--display)", fontSize: 14, color: "var(--muted)", marginBottom: 4 }}>
+          Nenhum produto encontrado
+        </div>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--muted-2)", letterSpacing: "0.06em" }}>
+          Preencha a seção 03 · Produtos primeiro
+        </div>
+      </div>
+    );
+  }
+
+  const icpMap = (value && typeof value === "object") ? value : {};
+
+  const handleChange = (idx, key, val) => {
+    const updated = { ...icpMap, [String(idx)]: { ...(icpMap[String(idx)] || {}), [key]: val } };
+    onChange(updated);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {produtos.map((produto, i) => {
+        const subtitle = [produto.preco, produto.para_quem].filter(Boolean).join(" · ");
+        return (
+          <IcpProductCard
+            key={i}
+            num={i + 1}
+            nomeProduto={produto.nome}
+            subtitleProduto={subtitle}
+            icpData={icpMap[String(i)] || {}}
+            onChange={(key, val) => handleChange(i, key, val)}
+            defaultOpen={i === 0}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/* ───────────────────────── FIELD ───────────────────────── */
+
+function Field({ field, value, onChange, allData }) {
   switch (field.kind) {
-    case "text":        return <TextField    field={field} value={value} onChange={onChange} />;
-    case "textarea":    return <TextArea     field={field} value={value} onChange={onChange} />;
-    case "segmented":   return <Segmented   field={field} value={value} onChange={onChange} />;
-    case "scale":       return <Scale       field={field} value={value} onChange={onChange} />;
-    case "chips":       return <Chips       field={field} value={value} onChange={onChange} />;
-    case "upload":      return <Upload      field={field} value={value} onChange={onChange} />;
+    case "text":        return <TextField     field={field} value={value} onChange={onChange} />;
+    case "textarea":    return <TextArea      field={field} value={value} onChange={onChange} />;
+    case "segmented":   return <Segmented    field={field} value={value} onChange={onChange} />;
+    case "scale":       return <Scale        field={field} value={value} onChange={onChange} />;
+    case "chips":       return <Chips        field={field} value={value} onChange={onChange} />;
+    case "upload":      return <Upload       field={field} value={value} onChange={onChange} />;
     case "visualpreset":return <VisualPreset field={field} value={value} onChange={onChange} />;
     case "flowbuilder": return <FlowBuilder  field={field} value={value} onChange={onChange} />;
-    default:            return null;
+    case "group":        return <GroupHeader   field={field} />;
+    case "products":     return <Products      field={field} value={value} onChange={onChange} />;
+    case "icp_products": return <IcpProducts   field={field} value={value} onChange={onChange} allData={allData} />;
+    default:             return null;
   }
 }
 
@@ -1150,6 +1783,14 @@ window.Field = Field;
 /* ───────────────────────── Helpers ───────────────────────── */
 
 function isFilled(field, value) {
+  if (field.kind === "group") return false;
+  if (field.kind === "products") {
+    return Array.isArray(value) && value.length > 0 && value.some((p) => p.nome && p.nome.trim());
+  }
+  if (field.kind === "icp_products") {
+    if (!value || typeof value !== "object") return false;
+    return Object.values(value).some((icp) => icp && (icp.icp_desc || icp.segmento || icp.dor_urgencia));
+  }
   if (value == null || value === "") return false;
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === "number") return true;
@@ -1162,8 +1803,9 @@ function isFilled(field, value) {
 
 function sectionProgress(section, data) {
   const ds = data[section.id] || {};
-  const total = section.fields.length;
-  const done = section.fields.filter((f) => isFilled(f, ds[f.id])).length;
+  const active = section.fields.filter((f) => f.kind !== "group");
+  const total = active.length;
+  const done = active.filter((f) => isFilled(f, ds[f.id])).length;
   return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
 }
 

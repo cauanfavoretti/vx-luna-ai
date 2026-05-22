@@ -103,32 +103,47 @@
     return prefix + "-" + Math.random().toString(36).slice(2, 10);
   }
 
-  /* ─── Build structured prompt from 6 sections ─── */
+  /* ─── Build structured prompt from 7 sections ─── */
   function buildDataPrompt(data) {
     const MAP = [
       {
-        id: "produto", title: "PRODUTO & OFERTA",
+        id: "boasvindas", title: "EMPRESA & IDENTIDADE",
         fields: [
-          ["nome",          "Nome da empresa"],
-          ["nicho",         "Nicho / mercado"],
-          ["site",          "Site / Instagram"],
-          ["regiao",        "Região de atuação"],
-          ["vende",         "O que a empresa vende"],
-          ["oferta",        "Oferta, planos e preços"],
-          ["transformacao", "Transformação + diferencial competitivo"],
-          ["promessa",      "Promessa central"],
-          ["resultados",    "Resultados, cases e ROI"],
+          ["nome",         "Nome da empresa"],
+          ["nicho",        "Nicho / mercado"],
+          ["site",         "Site / Instagram"],
+          ["regiao",       "Região de atuação"],
+          ["sobre",        "Sobre a empresa"],
+          ["resultados",   "Cases e resultados"],
+          ["missao",       "Missão"],
+          ["visao",        "Visão"],
+          ["valores",      "Valores da empresa"],
+          ["expert_nome",  "Expert / Sócios"],
+          ["expert_cargo", "Cargo do expert"],
+          ["expert_bio",   "Bio e trajetória do expert"],
+          ["expert_cred",  "Credenciais do expert"],
+          ["percepcao",    "Como a empresa deseja ser percebida"],
+          ["proposito",    "Propósito e missão comercial"],
+          ["conduta",      "Código de conduta — o que fazemos e nunca fazemos"],
+        ],
+      },
+      {
+        id: "mercado", title: "ESTUDO DE MERCADO",
+        fields: [
+          ["mercado_tamanho",      "Tamanho e oportunidade de mercado"],
+          ["mercado_tendencia",    "Tendências e diferencial estratégico"],
+          ["concorrentes_briefing","Principais concorrentes (briefing)"],
+          ["diferenciais",         "Diferencial vs. concorrentes"],
+          ["concorrentes_redes",   "Presença digital dos concorrentes"],
+          ["concorrentes_anuncios","Biblioteca de anúncios dos concorrentes"],
         ],
       },
       {
         id: "icp", title: "ICP — CLIENTE IDEAL",
         fields: [
-          ["modelo",       "Modelo de negócio"],
-          ["segmento",     "Segmento / setor"],
-          ["ticket",       "Ticket médio"],
-          ["icp_desc",     "Quem é o cliente ideal (perfil em prosa)"],
-          ["dor_urgencia", "Dor principal + gatilhos de urgência"],
-          ["qualifica",    "Critérios de qualificação vs. desqualificação"],
+          ["modelo",         "Modelo de negócio"],
+          ["icp_secundario", "Perfil de cliente secundário"],
+          ["anti_icp",       "Anti-ICP — quem NÃO deve ser atendido"],
         ],
       },
       {
@@ -157,37 +172,65 @@
         ],
       },
       {
-        id: "cultura", title: "MANUAL DE CULTURA",
-        fields: [
-          ["percepcao", "Como a empresa deseja ser percebida"],
-          ["proposito", "Propósito e missão comercial"],
-          ["valores",   "Valores da empresa"],
-          ["conduta",   "Código de conduta — o que fazemos e o que nunca fazemos"],
-        ],
-      },
-      {
         id: "operacao", title: "MAPA DE OPERAÇÃO & IDENTIDADE VISUAL",
         fields: [
-          ["crm",           "CRM utilizado"],
-          ["ferramentas",   "Ferramentas do time"],
-          ["funis",         "Funil de vendas — resumo"],
-          ["fluxo_mapa",    "Fluxograma detalhado do processo comercial (etapas, responsáveis, ferramentas, SLAs e critérios de avanço)"],
-          ["onboarding",    "Onboarding do cliente"],
-          ["gargalos",      "Gargalos atuais"],
-          ["visual_preset", "Preset visual selecionado"],
-          ["cor_primaria",  "Cor primária"],
-          ["cor_secundaria","Cor secundária"],
-          ["cor_fundo",     "Cor de fundo"],
-          ["fonte",         "Tipografia/fonte"],
-          ["mood",          "Mood visual"],
-          ["logo_desc",     "Logo e identidade visual"],
-          ["obs_material",  "Observações sobre os materiais anexados"],
+          ["crm",            "CRM utilizado"],
+          ["ferramentas",    "Ferramentas do time"],
+          ["funis",          "Funil de vendas — etapas e critério de avanço"],
+          ["fluxo_mapa",     "Fluxograma detalhado do processo comercial (etapas, responsáveis, ferramentas, SLAs e critérios de avanço)"],
+          ["onboarding",     "Onboarding do cliente"],
+          ["gargalos",       "Gargalos atuais"],
+          ["visual_preset",  "Preset visual selecionado"],
+          ["cor_primaria",   "Cor primária"],
+          ["cor_secundaria", "Cor secundária"],
+          ["cor_fundo",      "Cor de fundo"],
+          ["fonte",          "Tipografia/fonte"],
+          ["mood",           "Mood visual"],
+          ["obs_material",   "Observações sobre os materiais anexados"],
         ],
       },
     ];
 
     let prompt = "DADOS DA EMPRESA PARA PERSONALIZAÇÃO DO PLAYBOOK:\n\n";
     let hasAny = false;
+
+    /* ── Produtos (tratamento especial — array de objetos) ── */
+    const produtosLista = Array.isArray((data.produtos || {}).lista)
+      ? (data.produtos.lista).filter((p) => p.nome && p.nome.trim())
+      : [];
+    if (produtosLista.length > 0) {
+      hasAny = true;
+      prompt += `### PRODUTOS / SERVIÇOS\n`;
+      produtosLista.forEach((p, i) => {
+        prompt += `\n── Produto ${i + 1}: ${p.nome}\n`;
+        if (p.preco)     prompt += `  Preço / Investimento: ${p.preco}\n`;
+        if (p.para_quem) prompt += `  Para quem: ${p.para_quem}\n`;
+        if (p.descricao) prompt += `  O que inclui: ${p.descricao}\n`;
+      });
+      prompt += "\n";
+    }
+
+    /* ── ICP por produto (tratamento especial — objeto indexado) ── */
+    const icpPorProduto = (data.icp || {}).por_produto;
+    if (icpPorProduto && typeof icpPorProduto === "object" && produtosLista.length > 0) {
+      const icpLines = [];
+      produtosLista.forEach((prod, i) => {
+        const icp = icpPorProduto[String(i)];
+        if (!icp) return;
+        const hasData = icp.segmento || icp.ticket || icp.icp_desc || icp.dor_urgencia || icp.qualifica;
+        if (!hasData) return;
+        icpLines.push(`\n── ICP do Produto ${i + 1}: ${prod.nome}`);
+        if (icp.segmento)    icpLines.push(`  Segmento / setor: ${icp.segmento}`);
+        if (icp.ticket)      icpLines.push(`  Ticket médio: ${icp.ticket}`);
+        if (icp.icp_desc)    icpLines.push(`  Quem compra: ${icp.icp_desc}`);
+        if (icp.dor_urgencia)icpLines.push(`  Dor + gatilhos de urgência: ${icp.dor_urgencia}`);
+        if (icp.qualifica)   icpLines.push(`  Critérios de qualificação: ${icp.qualifica}`);
+      });
+      if (icpLines.length > 0) {
+        hasAny = true;
+        prompt += `### ICP — PERFIL DE CLIENTE IDEAL POR PRODUTO\n${icpLines.join("\n")}\n\n`;
+      }
+    }
 
     MAP.forEach(({ id, title, fields }) => {
       const sData = data[id] || {};
@@ -871,6 +914,16 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
               baseTemplate.content.slice(0, 20000))
         : "";
 
+      const compactModeBlock = !baseTemplate
+        ? `\n\n════════════════════════════════════\nMODO COMPACTO — SEM SNAPSHOT ATIVO\n════════════════════════════════════\n` +
+          `Gere o playbook com volume total de HTML ~40% menor do que o padrão máximo. Regras obrigatórias:\n` +
+          `① Mantenha TODAS as 7 seções (01 a 07) — não suprima nenhuma.\n` +
+          `② Mantenha o sistema visual, o design premium e a sidebar de navegação intactos.\n` +
+          `③ Reduza o volume por seção: parágrafos de 2-3 frases (não 4-5), listas de 3-4 itens (não 6-8), scripts com 1 exemplo por etapa (não 2-3).\n` +
+          `④ Priorize densidade de informação: cada frase deve carregar conteúdo real do cliente — sem enchimento.\n` +
+          `⑤ NÃO use lorem ipsum nem texto genérico para compensar volume — prefira menos texto com mais precisão.\n`
+        : "";
+
       const MILESTONES = [
         { chars: 2000,  label: "01 · Criando Manual de Boas Vindas..." },
         { chars: 7000,  label: "02 · Construindo Estudo de Mercado..." },
@@ -890,7 +943,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
           { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock +
+            content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock + compactModeBlock +
               "\n\nAgora gere o playbook operacional premium completo em HTML, " +
               "personalizando profundamente todo o conteúdo com os dados acima. " +
               "Retorne APENAS o HTML, começando com <!DOCTYPE html>.",

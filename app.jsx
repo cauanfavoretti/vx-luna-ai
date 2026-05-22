@@ -384,7 +384,7 @@ function App() {
   const [generatingLabel, setGeneratingLabel] = useState(null);
   const [playbook, setPlaybook] = useState(null);
   const [showKeyModal, setShowKeyModal] = useState(!(window.VX_API?.getKey()));
-  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("vx_welcome_2.0"));
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem("vx_welcome_1.1_beta"));
   const [snapshots, setSnapshots] = useState([]);
   const [playbooks, setPlaybooks] = useState([]);
   const [activeSnapshotId, setActiveSnapshotId] = useState(loadActiveSnapshotId);
@@ -822,6 +822,7 @@ function App() {
             onPrev={() => setActiveIdx(Math.max(0, activeIdx - 1))}
             onNext={() => setActiveIdx(Math.min(sections.length - 1, activeIdx + 1))}
             onGenerate={handleGenerate}
+            allData={data}
           />
           <RightRail
             totals={totals}
@@ -871,7 +872,7 @@ function App() {
       />
       <APIKeyModal open={showKeyModal} onClose={() => setShowKeyModal(false)} />
       <ErrorModal msg={errorMsg} onClose={() => setErrorMsg(null)} />
-      <WelcomeModal open={showWelcome} onClose={() => { localStorage.setItem("vx_welcome_2.0", "1"); setShowWelcome(false); }} />
+      <WelcomeModal open={showWelcome} onClose={() => { localStorage.setItem("vx_welcome_1.1_beta", "1"); setShowWelcome(false); }} />
     </div>
   );
 }
@@ -2549,8 +2550,8 @@ function SideNav({ sections, activeIdx, onSelect, data }) {
 
 /* ───────────────────────── MAIN ───────────────────────── */
 
-function Main({ section, idx, total, data, onChange, onPrev, onNext, onGenerate }) {
-  const sFields = section.fields;
+function Main({ section, idx, total, data, onChange, onPrev, onNext, onGenerate, allData }) {
+  const sFields = section.fields.filter((f) => f.kind !== "group");
   const sDone = sFields.filter((f) => window.isFilled(f, data[f.id])).length;
   const p = { done: sDone, total: sFields.length, pct: sFields.length ? Math.round((sDone / sFields.length) * 100) : 0 };
   return (
@@ -2610,7 +2611,7 @@ function Main({ section, idx, total, data, onChange, onPrev, onNext, onGenerate 
       }}>
         {section.fields.map((f) => (
           <div key={f.id} style={{ gridColumn: `span ${f.col || 12}` }}>
-            <window.Field field={f} value={data[f.id]} onChange={(v) => onChange(f.id, v)} />
+            <window.Field field={f} value={data[f.id]} onChange={(v) => onChange(f.id, v)} allData={allData} />
           </div>
         ))}
       </div>
@@ -4704,11 +4705,11 @@ function WelcomeModal({ open, onClose }) {
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
-            width: "100%", maxWidth: 460,
+            width: "100%", maxWidth: 520,
             background: "#0a0907",
             border: "1px solid rgba(255,91,21,0.35)",
             borderRadius: 20,
-            padding: "44px 36px 36px",
+            padding: "40px 36px 34px",
             boxShadow: "0 0 80px rgba(255,91,21,0.14), 0 24px 80px rgba(0,0,0,0.8)",
             animation: cardAnim,
             position: "relative",
@@ -4727,45 +4728,60 @@ function WelcomeModal({ open, onClose }) {
           {/* Badge versão */}
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 7,
-            padding: "4px 16px", borderRadius: 999, marginBottom: 28,
+            padding: "4px 16px", borderRadius: 999, marginBottom: 24,
             background: "rgba(255,91,21,0.10)", border: "1px solid rgba(255,91,21,0.30)",
             fontFamily: "var(--mono)", fontSize: 10, color: "var(--orange)", letterSpacing: "0.14em",
           }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--orange)", display: "inline-block" }} />
-            VERSÃO 2.0 · LANÇAMENTO OFICIAL
+            <div className="pulse-dot" style={{ width: 6, height: 6, flexShrink: 0 }} />
+            PATCH 1.1 BETA
           </div>
 
           {/* Título */}
           <div style={{
-            fontSize: 30, fontWeight: 800, fontFamily: "var(--display)",
-            color: "#f5efe4", lineHeight: 1.15, marginBottom: 10,
+            fontSize: 28, fontWeight: 800, fontFamily: "var(--display)",
+            color: "#f5efe4", lineHeight: 1.15, marginBottom: 6,
           }}>
-            Boas-vindas à<br />
-            <span style={{ color: "var(--orange)" }}>Luna AI 2.0</span>
+            <span style={{ color: "var(--orange)" }}>Luna AI</span> 1.1 Beta
           </div>
 
           {/* Subtítulo */}
           <div style={{
-            fontSize: 15, fontWeight: 600, color: "var(--ink-2)",
-            fontFamily: "var(--display)", marginBottom: 20,
+            fontSize: 13, fontWeight: 500, color: "var(--muted)",
+            fontFamily: "var(--mono)", marginBottom: 22, letterSpacing: "0.04em",
           }}>
-            A atualização oficial chegou!
+            O que há de novo nesta versão
           </div>
 
           {/* Divisor */}
-          <div style={{ height: 1, background: "rgba(255,91,21,0.15)", marginBottom: 22 }} />
+          <div style={{ height: 1, background: "rgba(255,91,21,0.15)", marginBottom: 20 }} />
 
-          {/* Corpo */}
-          <div style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.7, fontFamily: "var(--display)", marginBottom: 32 }}>
-            Descubra novas formas de criar playbooks<br />e muito mais <strong style={{ color: "var(--ink)" }}>brevemente</strong>.<br /><br />
-            <span style={{ color: "var(--orange)", fontWeight: 600 }}>Poupe tempo e gere processos.</span>
+          {/* Patch notes */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28, textAlign: "left" }}>
+            {[
+              { icon: "🗺️", tag: "NOVO",      col: "#f97316", text: "Mapa de Operações redesenhado — triggers como categoria própria, nodes organizados, picker n8n-style e badge ⚡ nos gatilhos" },
+              { icon: "📋", tag: "NOVO",      col: "#f97316", text: "Questionário com novas divisões: 7 seções, separadores visuais de grupo e ICP por produto" },
+              { icon: "⚡", tag: "MELHORIA",  col: "#60a5fa", text: "Luna gerando mais rápido e com menor consumo de tokens — modo compacto automático quando não há snapshot ativo" },
+              { icon: "🐛", tag: "FIX",       col: "#4ade80", text: "Correções na geração do playbook: campos ICP por produto, mapeamento de seções e estabilidade geral" },
+            ].map(({ icon, tag, col, text }) => (
+              <div key={tag + text.slice(0,10)} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1.3 }}>{icon}</span>
+                <div>
+                  <span style={{
+                    fontFamily: "var(--mono)", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
+                    color: col, background: col + "18", border: `1px solid ${col}44`,
+                    borderRadius: 4, padding: "1px 6px", marginRight: 8,
+                  }}>{tag}</span>
+                  <span style={{ fontFamily: "var(--display)", fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>{text}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Botão */}
           <button
             onClick={handleClose}
             style={{
-              width: "100%", padding: "15px 0", borderRadius: 12, cursor: "pointer",
+              width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer",
               background: "linear-gradient(135deg, #ff5b15, #c4400a)",
               border: "none", color: "#fff",
               fontFamily: "var(--display)", fontSize: 15, fontWeight: 700,
@@ -4773,10 +4789,10 @@ function WelcomeModal({ open, onClose }) {
               boxShadow: "0 4px 24px rgba(255,91,21,0.40)",
               transition: "opacity .15s, transform .15s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "scale(2.02)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "scale(1.02)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "scale(1)"; }}
           >
-            Começar agora
+            Entendido, vamos lá
           </button>
         </div>
       </div>
