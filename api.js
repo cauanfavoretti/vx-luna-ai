@@ -351,6 +351,99 @@ P0 — Logo fornecido → incorporar + derivar paleta | P1 — Visual preenchido
 
 Fundo escuro (#0x,#1x): surface rgba(255,255,255,.04), border rgba(255,255,255,.08) | Fundo claro: surface #fff, border rgba(0,0,0,.08)
 
+══════ DESIGN PREMIUM AVANÇADO ══════
+
+▸ SISTEMA DE ELEVAÇÃO (box-shadow em 4 níveis — adaptar alpha ao tema claro/escuro)
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.10)
+  --shadow-sm: 0 2px 4px rgba(0,0,0,.07), 0 4px 8px rgba(0,0,0,.08)
+  --shadow-md: 0 4px 12px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.08)
+  --shadow-lg: 0 12px 32px rgba(0,0,0,.14), 0 20px 48px rgba(0,0,0,.10)
+  --shadow-primary: 0 8px 28px rgba(var(--primary-rgb),.28)
+  Cards normais → --shadow-sm; Cards hero → --shadow-md; Modais/overlays → --shadow-lg; CTAs principais → --shadow-primary
+
+▸ SISTEMA DE GRADIENTES
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)
+  --gradient-surface: linear-gradient(180deg, var(--color-surface) 0%, rgba(var(--primary-rgb),.03) 100%)
+  --gradient-hero: linear-gradient(135deg, rgba(var(--primary-rgb),.12) 0%, rgba(var(--accent-rgb),.06) 100%)
+  --gradient-border: linear-gradient(135deg, var(--color-primary), var(--color-accent))
+  Usar gradient-border em pseudo-elementos ::before para bordas coloridas nos section heroes.
+  Texto com gradiente (títulos impactantes): background:var(--gradient-primary); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text
+
+▸ TIPOGRAFIA REFINADA
+  Escala type: --text-xs:.75rem --text-sm:.875rem --text-base:1rem --text-lg:1.125rem --text-xl:1.25rem --text-2xl:1.5rem --text-3xl:1.875rem --text-4xl:2.25rem --text-5xl:3rem
+  Line-heights: headings 1.1–1.2 / corpo 1.6–1.7 / captions 1.4
+  Letter-spacing: headings –0.02em / uppercase labels +0.08em / mono 0
+  Pesos: heading font-weight:700–800; sub-heading 600; corpo 400; muted 400 opacity:.6
+  Número destaque (stat-value): font-variant-numeric:tabular-nums; font-feature-settings:"tnum"
+  Uppercase labels (section badges, KPI labels): font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700; opacity:.7
+
+▸ ÍCONES SVG INLINE (obrigatório — NÃO usar ícone externo, emojis apenas em sidebar nav)
+  Cada section hero usa ícone SVG inline 48×48px com fill="none" stroke="currentColor" strokeWidth="1.5" — estilo Heroicons/Lucide outline.
+  Seção 01 👋: SVG casa/handshake. Seção 02 📊: SVG chart-bar. Seção 03 📦: SVG cube/package.
+  Seção 04 🎯: SVG crosshair/target. Seção 05 🗺️: SVG map/flow. Seção 06 💬: SVG message-circle. Seção 07 🏗️: SVG users/org-chart.
+  Envolver ícone em div .icon-wrap: display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:16px; background:var(--gradient-primary); color:#fff; box-shadow:var(--shadow-primary)
+  KPI cards: ícone 20×20 inline no canto superior direito, opacity:.6
+
+▸ ANIMAÇÕES COREOGRAFADAS
+  Entrada de seção: cada .reveal entra com stagger — adicionar delay via nth-child (0ms, 80ms, 160ms, 240ms…).
+  Hero badge entrada: @keyframes badgePop { 0%{transform:scale(.6);opacity:0} 70%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} } — aplicar em .section-badge
+  Número counter: animar de 0 ao valor real via requestAnimationFrame com easing ease-out ao entrar no viewport.
+  Progress bar fill: entrar com width:0→valor real em 1.2s ease-out ao entrar viewport.
+  Card hover: transform:translateY(-4px) scale(1.01); box-shadow:var(--shadow-lg); transition:all .22s cubic-bezier(.22,.68,0,1.2)
+  Gradient border hover (cards premium): usar border:1px solid transparent; background:linear-gradient(var(--color-bg),var(--color-bg)) padding-box, var(--gradient-primary) border-box ao hover
+  Botão CTA pulse: @keyframes ctaPulse { 0%,100%{box-shadow:0 0 0 0 rgba(var(--primary-rgb),.4)} 60%{box-shadow:0 0 0 8px rgba(var(--primary-rgb),0)} } — aplicar em botão principal de cada seção
+  Sidebar item active: @keyframes slideRight { from{transform:translateX(-6px);opacity:0} to{transform:none;opacity:1} }
+
+▸ SCROLL EXPERIENCE
+  Scrollbar customizada: ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(var(--primary-rgb),.3);border-radius:4px} ::-webkit-scrollbar-thumb:hover{background:rgba(var(--primary-rgb),.6)}
+  Sidebar scrollbar: width:3px
+
+▸ SECTION HEROES CINEMATOGRÁFICOS
+  Cada seção começa com hero full-width: padding 64px 0 48px; background: var(--gradient-hero) + padrão de fundo (dot grid ou linhas diagonais sutis em SVG data:uri).
+  Dot grid SVG background: background-image:radial-gradient(circle,rgba(var(--primary-rgb),.12) 1px,transparent 1px); background-size:24px 24px
+  Estrutura hero: [.section-badge uppercase label primary] → [.icon-wrap 56px] → [h2 gradient-text clamp] → [p.hero-desc muted max-width:600px]
+  Separador visual da seção após o hero: div height:1px; background:var(--gradient-border); opacity:.3; margin:0 -56px
+
+▸ DATA VISUALIZATION CSS/SVG PURO (sem bibliotecas externas)
+  Bar chart horizontal: divs com width:% animados, label à esquerda, valor à direita, barra com background:var(--gradient-primary); border-radius:0 4px 4px 0; height:10px
+  Donut / ring progress: SVG circle stroke-dasharray + stroke-dashoffset animado ao entrar viewport. r=40, cx=50, cy=50, viewBox="0 0 100 100"
+  Spark bar (mini chart em KPI): 7 divs inline-block height variável 4-20px; bar-gap:2px; mesmo gradiente primary
+  Funil de vendas: divs .funnel-level em coluna centralizada com clip-path:polygon para formato trapézio, cada nível com cor distinta e % animado
+  Termômetro de score: div vertical position:relative; fill animado de baixo p/ cima ao entrar viewport
+
+▸ CARDS COM PROFUNDIDADE VISUAL
+  Card principal: bg var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:24px 28px; box-shadow:var(--shadow-sm); overflow:hidden; position:relative
+  Accent line no topo: card::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--gradient-primary) }
+  Card premium (hero/highlight): border-radius:20px; padding:32px 36px; box-shadow:var(--shadow-md); background:var(--gradient-surface)
+  Card de estatística: accent line lateral esquerda (width:4px; height:100%; left:0; top:0) + stat-value clamp(1.8rem,4vw,2.6rem) + delta badge (↑/↓ verde/vermelho)
+  Card de persona ICP: avatar circular 64px gradiente primary→accent com iniciais; nome bold 1.1rem; cargo muted .85rem; empresa tag pill; quote itálico opacity:.75; borda radius:24px
+
+▸ TABELAS NÍVEL ENTERPRISE
+  thead: background:var(--gradient-primary); color:#fff; th: padding:14px 20px; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase
+  tbody tr: transition:background .15s; border-bottom:1px solid var(--color-border)
+  tbody tr:hover: background:rgba(var(--primary-rgb),.04)
+  tbody tr:nth-child(even): background:rgba(var(--primary-rgb),.015)
+  td: padding:12px 20px; font-size:.9rem
+  Overflow wrapper: div.table-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--color-border); box-shadow:var(--shadow-xs) }
+  Sticky header em tabelas longas: thead th { position:sticky; top:0; z-index:1 }
+
+▸ PILLS E BADGES DETALHADOS
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; letter-spacing:.04em }
+  .badge-ok: bg rgba(16,185,129,.12) color #059669 border 1px solid rgba(16,185,129,.25)
+  .badge-warn: bg rgba(245,158,11,.12) color #d97706 border 1px solid rgba(245,158,11,.25)
+  .badge-alert: bg rgba(239,68,68,.12) color #dc2626 border 1px solid rgba(239,68,68,.25)
+  .badge-info: bg rgba(59,130,246,.12) color #2563eb border 1px solid rgba(59,130,246,.25)
+  .badge-primary: bg rgba(var(--primary-rgb),.14) color var(--color-primary) border 1px solid rgba(var(--primary-rgb),.3)
+  .badge-neutral: bg rgba(0,0,0,.05) color inherit border 1px solid var(--color-border)
+  Canal emoji pill nos script blocks: font-size:.75rem; padding:4px 12px; border-radius:999px; font-weight:600
+
+▸ FLUXOGRAMA CSS NATIVO (Seção 05)
+  Layout flex coluna centralizada no mobile, flex row com wrap no desktop.
+  Cada nó: div.flow-node { position:relative; min-width:160px; max-width:200px; padding:14px 18px; border-radius:12px; background:var(--color-surface); border:2px solid var(--color-border); box-shadow:var(--shadow-sm); text-align:center }
+  Cores por fase: prospecção border/text #3b82f6; qualificação border/text #f59e0b; proposta border/text #8b5cf6; fechamento border/text #10b981; pós-venda border/text #06b6d4
+  Seta connector: div.flow-arrow { display:flex; align-items:center; justify-content:center; color:var(--color-muted); font-size:1.2rem } — usa ↓ em mobile e → em desktop via media query
+  Badges dentro do nó: responsável (badge-primary) + ferramenta (badge-neutral) + SLA (badge-warn) em row flex wrap gap:4px margin-top:8px
+
 ══════ LAYOUT OBRIGATÓRIO ══════
 HEADER fixo (z-index:100, backdrop-filter:blur(12px), border-bottom 1px var(--color-border)):
   Esquerda: logo + nome empresa bold | Centro: "PLAYBOOK OPERACIONAL v1.0" mono 0.7rem muted | Direita: data + "Gerado por Luna AI" + botão hamburger (só ≤1024px)
@@ -380,23 +473,24 @@ JAVASCRIPT inline antes de </body>:
   ⑧ Botão "copiar" nos script blocks: navigator.clipboard.writeText(texto) + feedback visual "Copiado!"
 
 ══════ COMPONENTES PREMIUM OBRIGATÓRIOS ══════
-Hero section por seção: ícone 48px gradient + label uppercase primary + h2 clamp + desc muted
-Stat cards: grid repeat(auto-fit,minmax(180px,1fr)), barra top 3px gradient primary→accent, stat-value primary clamp, label uppercase muted
-Tabelas: thead bg primary texto contraste, sem bordas verticais, tr:hover primary 3% opacity, border-radius 12px overflow:hidden
-Script blocks: bg surface, border-left 4px primary, border-radius 0 12px 12px 0, badge canal emoji pill (📱WhatsApp/📧Email/📞Call/💬DM), font mono, label momento muted, BOTÃO "📋 Copiar" no canto superior direito
-Cards DEFA/AIDA: grid 4 cols → 2 (≤900px) → 1 (≤560px), letra grande transparent bg-clip:text gradient primary→accent
-Timeline: horizontal → vertical em ≤768px, dots bg primary, line gradient primary→accent, cada ponto com nome+objetivo+responsável+ferramenta+SLA
-Progress bars: height 6px gradient primary→accent transition 1.2s
-Checklists: ✓ verde rgba(16,185,129,.12) / ✗ vermelho rgba(239,68,68,.10), círculos 20px
-Badges pill: badge-ok verde / badge-warn âmbar / badge-alert vermelho / badge-info azul
-Glassmorphism (CTAs e cards hero): bg rgba(255,255,255,.05) border rgba(255,255,255,.10) backdrop-filter:blur(12px)
-Quote blocks: border-left 4px accent, aspas decorativas opacity:.2
-Separadores: nº badge circular primary + linha gradient primary→transparent
-Espaçamento: entre seções 96px | sub-seções 48px | cards gap:16px | padding cards 20-28px
-Hover: translateY(-3px) + box-shadow transition .2s
-Accordion: border surface, header clicável com chevron rotativo, body height:0→auto transition
-Funil visual: div empilhado trapézio CSS, cada nível cor diferente com % e label
-KPI Dashboard: grid cards dark com barra colorida lateral esquerda 4px, valor grande, delta % (verde/vermelho), descrição muted
+Hero section por seção: div.icon-wrap 56px gradient + .section-badge uppercase label + h2 gradient-text clamp + p.hero-desc muted + dot-grid background + separador gradiente após
+Stat cards: grid repeat(auto-fit,minmax(200px,1fr)); card com ::before accent line topo 3px gradient; stat-value clamp(1.8rem,4vw,2.6rem) gradient-text; label uppercase muted .7rem; ícone SVG 20px canto superior direito; box-shadow var(--shadow-sm); hover shadow-md + translateY(-4px)
+Tabelas: wrapper div.table-wrap border-radius:14px overflow-x:auto; thead gradient primary 100%; letra uppercase .8rem; tr:hover rgba primary .04; nth-child(even) rgba primary .015; td padding 12px 20px; sticky thead; border-radius 14px
+Script blocks: bg surface, border-left 4px primary, border-radius 0 12px 12px 0, badge canal emoji pill (📱WhatsApp/📧Email/📞Call/💬DM), font mono .9rem, label momento muted, BOTÃO "📋 Copiar" canto superior direito — navigator.clipboard + feedback "Copiado!" 2s
+Cards DEFA/AIDA/Pilares: grid 4 cols → 2 (≤900px) → 1 (≤560px); letra destaque gradient bg-clip:text; card ::before accent gradient topo 3px; hover gradient border via padding-box/border-box
+Timeline: horizontal desktop → vertical ≤768px; dot 12px bg primary box-shadow var(--shadow-primary); linha gradient primary→accent; cada ponto: nome bold + badge responsável + badge ferramenta + badge SLA + desc muted; stagger entrada reveal
+Progress bars: wrapper bg rgba primary .1 border-radius 999px height 8px; fill gradient primary→accent; animado width:0→valor ao entrar viewport 1.4s ease-out; label valor % à direita mono
+Checklists: ✓ circle 22px bg rgba(16,185,129,.12) border rgba(16,185,129,.3) ícone SVG check verde / ✗ circle 22px bg rgba(239,68,68,.10) border rgba(239,68,68,.25) ícone SVG x vermelho; item hover bg rgba primary .03
+Badges pill: sistema completo conforme DESIGN PREMIUM AVANÇADO — badge-ok/warn/alert/info/primary/neutral
+Glassmorphism (CTAs hero e cards destaque): bg rgba(255,255,255,.05) border 1px solid rgba(255,255,255,.10) backdrop-filter:blur(16px) border-radius:20px; dark mode only
+Quote blocks: border-left 4px var(--color-accent); bg rgba(var(--accent-rgb),.04); aspas decorativas " " font-size:4rem opacity:.15 position:absolute top:8px left:16px; padding:20px 24px 20px 48px
+Separadores de seção: div com badge circular nº primary 32px + linha gradient primary→transparent flex:1 height:1px ml:12px; margin-bottom:32px
+Espaçamento: entre seções 96px | sub-seções 56px | cards gap:20px | padding cards 24-32px
+Hover: translateY(-4px) scale(1.01) box-shadow var(--shadow-lg) transition all .22s cubic-bezier(.22,.68,0,1.2)
+Accordion: bg surface; header padding 18px 24px; chevron SVG rotativo 180deg; body max-height:0→9999px ease .4s; header.open border-bottom-radius:0; primeiro accordion aberto por padrão
+Funil visual: .funnel-level div com clip-path:polygon(5% 0%,95% 0%,100% 100%,0% 100%) ou calc via JS; cada nível altura 52px; gradiente de cores fase→fase; % e label overlay center; wrapper centralizado max-width:420px
+KPI Dashboard: grid cards; border-left 4px solid (cor semântica: azul/verde/âmbar/vermelho); bg surface; valor bold clamp(1.6rem,3vw,2rem); delta chip ↑/↓ com bg colorido; desc muted .8rem; ícone SVG 20px; hover shadow-md
+Bar chart CSS: .bar-chart div.bar-row (flex, label 120px, barra flex:1, valor 60px); div.bar fill width:% animated; height:10px border-radius:0 4px 4px 0; gradient primary→accent; tooltip data-val em ::after
 
 ══════ SISTEMA DE EDIÇÃO INLINE (obrigatório) ══════
 ① data-editable="true" + id único em TODOS: h1/h2/h3, p conteúdo, td/th, li, .script-text, .stat-value, blockquote p. NÃO marcar: sidebar, header, vx-edit-bar, decorativos.
@@ -522,7 +616,21 @@ Cargos (gerar todos os 7 acordeões):
 ⑥ ANALISTA DE CRM — Operações Comerciais (dados, CRM, relatórios e processos)
 ⑦ RESGATE DE ORÇAMENTO — Recuperação de Leads e Clientes inativos
 
-O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + dashboard executivo + manual operacional proprietário". Gere o playbook completo em HTML com as 7 seções, sidebar elegante, TODOS os sub-itens em accordions expansíveis com JavaScript funcional, todos os componentes premium, design sofisticado e sistema de edição inline. O resultado deve superar qualquer template genérico — sofisticação, hierarquia visual e sensação enterprise que vale caro.`
+O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + dashboard executivo + manual operacional proprietário". Gere o playbook completo em HTML com as 7 seções, sidebar elegante, TODOS os sub-itens em accordions expansíveis com JavaScript funcional, todos os componentes premium, design sofisticado e sistema de edição inline.
+
+PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
+✦ Cada seção deve ter hero cinematográfico com dot-grid background, ícone SVG no .icon-wrap gradiente, título com gradient-text e separador gradiente após.
+✦ Usar sistema de elevação completo (--shadow-xs até --shadow-primary) — nunca todos os cards com a mesma sombra.
+✦ Animar TUDO ao entrar no viewport: stat counters, progress bars, cards .reveal com stagger delay, seção badges com badgePop.
+✦ Todos os números importantes em stat cards com gradient-text + tabular-nums.
+✦ Tabelas sempre no wrapper .table-wrap com sticky thead, zebra rows, hover, border-radius 14px.
+✦ Botões CTA principais com ctaPulse animation e shadow-primary.
+✦ Checklists com círculos SVG ✓/✗, nunca texto puro.
+✦ Timeline com dots circulares shadow-primary e linha gradient.
+✦ Cards com ::before accent gradient line no topo (3px).
+✦ Scrollbar customizada em toda a página e sidebar.
+✦ Gradiente de texto (gradient-text) nos h1 e h2 de destaque de cada seção.
+✦ O resultado deve ser visualmente indistinguível de um produto SaaS de R$50.000+ — sofisticação absoluta, hierarquia visual precisa, sensação enterprise premium que justifica alto valor percebido.`
 
 
   /* ─── Anthropic Messages API (com retry automático) ─── */
@@ -532,7 +640,7 @@ O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + 
     }
 
     const MAX_RETRIES = 2;
-    const TIMEOUT_MS  = 8 * 60 * 1000; // 8 min — suficiente para 50k tokens
+    const TIMEOUT_MS  = 30 * 60 * 1000; // 30 min — sem limite prático
 
     /* Separar system prompt dos messages (Anthropic exige system no top-level) */
     let systemPrompt = undefined;
@@ -567,7 +675,7 @@ O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + 
       model: config.openaiModel,
       messages: filteredMessages,
       stream: true,
-      max_tokens: maxTokens || 50000,
+      max_tokens: maxTokens || 64000,
     };
     if (systemPrompt) bodyObj.system = systemPrompt;
 
@@ -929,29 +1037,9 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
-      const COMPACT_S06 = `─── SEÇÃO 06 · SCRIPTS DE VENDAS ───
-Hero da seção. EXATAMENTE 5 accordions — scripts completos, concisos e personalizados. Blocos terminal premium: bg surface, border-left 4px primary, badge canal emoji pill (📱WhatsApp / 📧Email / 📞Call / 💬DM), BOTÃO "📋 Copiar".
-
-① Cadência de Qualificação — 3 mensagens: abertura com gancho + diagnóstico SPIN + proposta de próximo passo. Máx 3 linhas por mensagem.
-② Follow Up — Sem Resposta — 3 mensagens (D+1, D+3, D+7): ganchos distintos (curiosidade / prova social / último contato). Máx 3 linhas cada.
-③ Cadência de Agendamento — 2 mensagens: proposta de horário com opções + confirmação. Máx 3 linhas cada.
-④ Script de Fechamento — script direto da call (6-8 frases encadeadas) + 3 frases alternativas de fechamento em pills coloridas.
-⑤ Quebra de Objeção — tabela premium com 5 objeções: Objeção | Resposta Completa | Técnica.`;
-
-      const COMPACT_S07 = `─── SEÇÃO 07 · ESTRUTURAÇÃO DO TIME COMERCIAL ───
-Hero da seção. EXATAMENTE 4 accordions — um por cargo: SDR, Closer, Pós Venda e Gestor Comercial. NÃO gerar BDR, Farmer, Analista de CRM nem Resgate.
-
-Cada accordion contém UM ÚNICO CARD com: objetivo em 1 linha + responsabilidades checklist ✓ (4 itens) + KPIs (3, em mini stat cards) + ferramentas em badges + remuneração em 3 linhas (base | comissão | bônus). SEM tabela de rotina semanal, SEM tabela de simulação de ganhos, SEM entregáveis por período.`;
-
-      const activeSystemPrompt = !baseTemplate
-        ? SYSTEM_PROMPT
-            .replace(/─── SEÇÃO 06 · SCRIPTS DE VENDAS ───[\s\S]*?(?=─── SEÇÃO 07)/, COMPACT_S06 + "\n\n")
-            .replace(/─── SEÇÃO 07 · ESTRUTURAÇÃO DO TIME COMERCIAL ───[\s\S]*?(?=O resultado deve parecer)/, COMPACT_S07 + "\n\n")
-        : SYSTEM_PROMPT;
-
       let htmlContent = await callAnthropic(
         [
-          { role: "system", content: activeSystemPrompt },
+          { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
             content: dataPrompt + logoBlock + dataFilesBlock + baseTemplateBlock +
@@ -968,7 +1056,7 @@ Cada accordion contém UM ÚNICO CARD com: objetivo em 1 linha + responsabilidad
             mIdx++;
           }
         },
-        baseTemplate ? 50000 : 40000
+        64000
       );
 
       console.log("[VX] Resposta recebida, tamanho:", htmlContent.length, "chars");
@@ -1007,7 +1095,7 @@ Cada accordion contém UM ÚNICO CARD com: objetivo em 1 linha + responsabilidad
         html: htmlContent,
         pages: 1,
         wordCount,
-        compact: !baseTemplate,
+
         sections: [
           "01 · Manual de Boas Vindas",
           "02 · Estudo de Mercado",
