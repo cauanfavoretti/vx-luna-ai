@@ -14,7 +14,7 @@
     authToken: null,
     useMock: false,
     openaiKey: DEFAULT_KEY,
-    openaiModel: "claude-opus-4-7",
+    openaiModel: "claude-sonnet-4-6",
     onEvent: null,
   };
 
@@ -729,7 +729,7 @@ O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + 
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
-          model: "claude-opus-4-7",
+          model: config.openaiModel,
           messages: [{ role: "user", content: "Responda apenas: OK" }],
           max_tokens: 5,
         }),
@@ -935,7 +935,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       ];
       let mIdx = 0;
 
-      onStep && onStep({ label: "Conectando ao Claude Opus 4.7...", progress: 2 });
+      onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
       let htmlContent = await callAnthropic(
