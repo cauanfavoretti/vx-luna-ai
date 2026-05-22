@@ -526,7 +526,7 @@ O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + 
 
 
   /* ─── Anthropic Messages API (com retry automático) ─── */
-  async function callAnthropic(messages, onToken) {
+  async function callAnthropic(messages, onToken, maxTokens) {
     if (!config.openaiKey) {
       throw new Error("Chave Anthropic não configurada. Configure em 'API Key' no topo.");
     }
@@ -567,7 +567,7 @@ O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + 
       model: config.openaiModel,
       messages: filteredMessages,
       stream: true,
-      max_tokens: 50000,
+      max_tokens: maxTokens || 50000,
     };
     if (systemPrompt) bodyObj.system = systemPrompt;
 
@@ -915,13 +915,22 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
         : "";
 
       const compactModeBlock = !baseTemplate
-        ? `\n\n════════════════════════════════════\nMODO COMPACTO — SEM SNAPSHOT ATIVO\n════════════════════════════════════\n` +
-          `Gere o playbook com volume total de HTML ~40% menor do que o padrão máximo. Regras obrigatórias:\n` +
-          `① Mantenha TODAS as 7 seções (01 a 07) — não suprima nenhuma.\n` +
-          `② Mantenha o sistema visual, o design premium e a sidebar de navegação intactos.\n` +
-          `③ Reduza o volume por seção: parágrafos de 2-3 frases (não 4-5), listas de 3-4 itens (não 6-8), scripts com 1 exemplo por etapa (não 2-3).\n` +
-          `④ Priorize densidade de informação: cada frase deve carregar conteúdo real do cliente — sem enchimento.\n` +
-          `⑤ NÃO use lorem ipsum nem texto genérico para compensar volume — prefira menos texto com mais precisão.\n`
+        ? `\n\n════════════════════════════════════\nMODO COMPACTO — LIMITE RÍGIDO DE OUTPUT\n════════════════════════════════════\n` +
+          `ATENÇÃO: você DEVE gerar o playbook com no máximo 54.000 caracteres totais de HTML. Este é um limite absoluto, não uma sugestão.\n\n` +
+          `REGRAS INEGOCIÁVEIS:\n` +
+          `① Todas as 7 seções obrigatórias devem estar presentes — sidebar e navegação completas.\n` +
+          `② CSS, JavaScript, design e componentes visuais são preservados — o corte é EXCLUSIVAMENTE no volume de conteúdo textual.\n` +
+          `③ Zero texto decorativo, introdutório ou genérico. Cada frase deve conter dado real do cliente.\n` +
+          `④ Parágrafos: máx 2 frases. Listas: máx 4 itens. Tabelas: máx 4 linhas de dados.\n` +
+          `⑤ NÃO repita informação entre seções — cada dado do cliente aparece uma única vez.\n\n` +
+          `LIMITES RÍGIDOS POR SEÇÃO:\n` +
+          `S01 · Boas-Vindas — 3 accordions (não 4). MVV: 1 parágrafo por card. Bio expert: 3 linhas. Cultura: 4 pilares, 1 linha cada.\n` +
+          `S02 · Mercado — 2 accordions (não 3). Tabela concorrentes: máx 3 linhas. Cards individuais: máx 2 concorrentes.\n` +
+          `S03 · Produtos — Por produto: checklist máx 4 itens, sem tabela de planos/tiers, 2 pilares de valor (não 3).\n` +
+          `S04 · ICP — 2 accordions: Cliente Principal + Anti-ICP (suprimir o Secundário ou fundir em 3 bullets no principal). Persona: 4 atributos. Qualificação: 4 critérios.\n` +
+          `S05 · Operação — Fluxograma: máx 6 etapas. Tabela SLA: máx 5 linhas. Gargalos: máx 2 cards.\n` +
+          `S06 · Scripts — APENAS 5 accordions (não 9): ①Qualificação (3 msgs) ②Follow Up sem resposta (3 msgs) ③Agendamento (2 msgs) ④Fechamento (script direto + 3 frases de fechamento) ⑤Quebra de Objeção (tabela com 5 objeções). Cada mensagem: máx 3 linhas.\n` +
+          `S07 · Time — APENAS 4 cargos (não 7): SDR, Closer, Pós Venda e Gestor Comercial. Por cargo: responsabilidades máx 4 itens, KPIs máx 3, rotina como lista simples sem tabela, remuneração em 3 linhas.\n`
         : "";
 
       const MILESTONES = [
@@ -956,7 +965,8 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
             onStep && onStep({ label: MILESTONES[mIdx].label, progress: pct });
             mIdx++;
           }
-        }
+        },
+        baseTemplate ? 50000 : 40000
       );
 
       console.log("[VX] Resposta recebida, tamanho:", htmlContent.length, "chars");
