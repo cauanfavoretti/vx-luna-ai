@@ -3622,55 +3622,55 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
   const [editAttachments, setEditAttachments] = useState([]);
   const [editAttLoading, setEditAttLoading] = useState(false);
   const editFileRef = useRef(null);
-  const [compactBannerDismissed, setCompactBannerDismissed] = useState(false);
+  const [tokenBannerDismissed, setTokenBannerDismissed] = useState(false);
 
   if (!playbook) return null;
 
-  const CompactBanner = () => {
-    if (!playbook.compact || compactBannerDismissed) return null;
+  const TokenLimitBanner = () => {
+    if (!playbook.tokenLimitReached || tokenBannerDismissed) return null;
     return (
       <div style={{
         position: "fixed", left: 0, top: "50%", transform: "translateY(-50%)",
-        zIndex: 1200, width: 220,
+        zIndex: 1200, width: 232,
         background: "var(--surface-2)",
         border: "1px solid var(--border-strong)",
         borderLeft: "none",
-        borderRadius: "0 12px 12px 0",
+        borderRadius: "0 14px 14px 0",
         padding: "16px 16px 14px 18px",
-        boxShadow: "4px 0 24px rgba(0,0,0,0.5)",
-        animation: "slideInLeft .3s cubic-bezier(.22,.68,0,1.2) both",
+        boxShadow: "4px 0 28px rgba(0,0,0,0.55)",
+        animation: "slideInLeft .35s cubic-bezier(.22,.68,0,1.2) both",
       }}>
-        <style>{`@keyframes slideInLeft { from { opacity:0; transform: translateY(-50%) translateX(-100%) } to { opacity:1; transform: translateY(-50%) translateX(0) } }`}</style>
+        <style>{`@keyframes slideInLeft { from { opacity:0; transform: translateY(-50%) translateX(-110%) } to { opacity:1; transform: translateY(-50%) translateX(0) } }`}</style>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--gold)", flexShrink: 0, marginTop: 1 }} />
-            <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--gold)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
-              Versão Compacta
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#60a5fa", flexShrink: 0, marginTop: 1 }} />
+            <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "#60a5fa", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              Geração Completa
             </span>
           </div>
           <button
-            onClick={() => setCompactBannerDismissed(true)}
+            onClick={() => setTokenBannerDismissed(true)}
             style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--muted-2)", padding: 0, lineHeight: 1, flexShrink: 0 }}
             title="Fechar"
           >
             <window.Icon name="x" size={13} />
           </button>
         </div>
-        <div style={{ fontFamily: "var(--display)", fontSize: 12, color: "var(--ink-2)", lineHeight: 1.55, marginBottom: 12 }}>
-          Esta é uma versão comprimida do playbook. Continue editando na aba edição para expandir o conteúdo.
+        <div style={{ fontFamily: "var(--display)", fontSize: 12, color: "var(--ink-2)", lineHeight: 1.6, marginBottom: 14 }}>
+          O playbook atingiu o limite máximo de geração. Use a <strong style={{ color: "var(--ink-1)" }}>aba Edição</strong> para continuar e expandir qualquer seção.
         </div>
         <button
-          onClick={() => { setCompactBannerDismissed(true); setEditing(true); }}
+          onClick={() => { setTokenBannerDismissed(true); setEditing(true); }}
           style={{
-            width: "100%", padding: "7px 0", borderRadius: 7, cursor: "pointer",
-            background: "rgba(255,181,71,0.12)", border: "1px solid rgba(255,181,71,0.35)",
-            color: "var(--gold)", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.06em",
+            width: "100%", padding: "8px 0", borderRadius: 8, cursor: "pointer",
+            background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.35)",
+            color: "#60a5fa", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.06em",
             transition: "background .15s",
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,181,71,0.22)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,181,71,0.12)"}
+          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(96,165,250,0.22)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(96,165,250,0.12)"}
         >
-          Ir para Edição →
+          Continuar na Edição →
         </button>
       </div>
     );
@@ -3679,7 +3679,7 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
   if (editing) {
     return (
       <>
-        <CompactBanner />
+        <TokenLimitBanner />
         <PlaybookEditor playbook={playbook} onClose={() => setEditing(false)} />
       </>
     );
@@ -3781,7 +3781,7 @@ function DownloadScreen({ playbook, onClose, onSaveSnapshot, onGoToSnapshots, on
 
   return (
     <>
-    <CompactBanner />
+    <TokenLimitBanner />
     <div style={{
       position: "fixed", inset: 0, zIndex: 1100,
       background: "rgba(8,7,6,0.95)", backdropFilter: "blur(16px)",

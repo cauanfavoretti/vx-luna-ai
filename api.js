@@ -733,13 +733,13 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
         let content    = "";
         let buffer     = "";
         let streamDone = false;
+        let stopReason = "end_turn";
 
         while (!streamDone) {
           let chunk;
           try {
             chunk = await reader.read();
           } catch (readErr) {
-            const errMsg  = readErr.message || "";
             const isOurTimeout = abort.signal.aborted;
 
             if (isOurTimeout) {
@@ -752,7 +752,7 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
               break;
             }
 
-            console.warn(`[VX] Stream abortado (tentativa ${attempt}): "${errMsg}"`);
+            console.warn(`[VX] Stream abortado (tentativa ${attempt}): "${readErr.message}"`);
             throw readErr;
           }
 
@@ -770,6 +770,9 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
             try {
               const parsed = JSON.parse(json);
               if (parsed.type === "message_stop") { streamDone = true; break; }
+              if (parsed.type === "message_delta" && parsed.delta?.stop_reason) {
+                stopReason = parsed.delta.stop_reason;
+              }
               if (parsed.type === "error") throw new Error(parsed.error?.message || "Erro no stream.");
               if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
                 const token = parsed.delta.text || "";
@@ -790,8 +793,8 @@ PADRÃO DE QUALIDADE VISUAL OBRIGATÓRIO:
           throw new Error("API retornou conteúdo vazio. Modelo: " + config.openaiModel);
         }
 
-        console.log("[VX] Stream concluído:", content.length, "chars");
-        return content;
+        console.log("[VX] Stream concluído:", content.length, "chars | stop_reason:", stopReason);
+        return { content, stopReason };
 
       } catch (err) {
         const msg = err.message || "";
@@ -1037,7 +1040,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       onStep && onStep({ label: "Conectando ao Claude Sonnet 4.6...", progress: 2 });
       console.log("[VX] Chamando Anthropic...", config.openaiModel);
 
-      let htmlContent = await callAnthropic(
+      const { content: htmlContent, stopReason } = await callAnthropic(
         [
           { role: "system", content: SYSTEM_PROMPT },
           {
@@ -1095,7 +1098,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
         html: htmlContent,
         pages: 1,
         wordCount,
-
+        tokenLimitReached: stopReason === "max_tokens",
         sections: [
           "01 · Manual de Boas Vindas",
           "02 · Estudo de Mercado",
@@ -1270,7 +1273,7 @@ p{color:#94a3b8;line-height:1.6;margin-bottom:24px}
       });
       console.log("[VX] generateQuickPlaybook — chamando Anthropic...");
 
-      let htmlContent = await callAnthropic(
+      let { content: htmlContent } = await callAnthropic(
         [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
@@ -1364,7 +1367,7 @@ REGRAS ABSOLUTAS:
         `${resources.styles.length} style blocks | ${resources.scripts.length} script blocks)`
       );
 
-      let result = await callAnthropic(
+      let { content: result } = await callAnthropic(
         [
           { role: "system", content: ADAPT_SYSTEM },
           {
@@ -1472,7 +1475,7 @@ REGRAS OBRIGATÓRIAS:
         userContent = textContent;
       }
 
-      let result = await callAnthropic(
+      let { content: result } = await callAnthropic(
         [
           { role: "system", content: EDIT_SYSTEM },
           { role: "user", content: userContent },
