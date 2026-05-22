@@ -300,6 +300,7 @@ O resultado deve parecer um sistema proprietário de operação, não um PDF sim
 4. Personalize TODO o conteúdo com os dados fornecidos. Nunca use conteúdo genérico quando há dado disponível.
 5. Adapte terminologia: saúde→paciente/tratamento | B2B→lead/solução | agência→cliente/campanha | imóveis→comprador/imóvel | SaaS→usuário/plano.
 6. NÃO faça: layout de blog, documento Word, visual genérico, página corrida de texto, cards pobres, tipografia ruim, interface poluída ou design amador.
+7. TAMANHO ALVO: o HTML final deve ter aproximadamente 45.000 a 55.000 caracteres. Gerencie o ritmo da escrita ao longo das 7 seções para chegar nessa faixa — não corte conteúdo, não omita seções, mas seja direto e preciso: evite repetições, parágrafos prolixos, comentários HTML desnecessários e classes CSS não utilizadas. CSS compartilhado deve ser reutilizado via classes, não duplicado inline. Scripts devem ser concisos. Conteúdo textual deve ser denso em valor, não em volume.
 
 ══════ PRINCÍPIOS DE DESIGN PREMIUM ══════
 Interface minimalista, sofisticada, moderna, clean, corporativa, alta legibilidade, sensação de tecnologia + consultoria premium.
@@ -566,55 +567,28 @@ Hero da seção. Fluxograma visual completo do processo comercial — do lead ao
 ③ Accordion: Gargalos Identificados — cards problema com badge-alert + impacto quantificado + ação corretiva + prazo recomendado.
 
 ─── SEÇÃO 06 · SCRIPTS DE VENDAS ───
-Hero da seção. 9 accordions expansíveis — cada um com script COMPLETO E PRONTO (sem [placeholders], mensagem real e personalizada com dados da empresa). Usar palavras_sim, evitar palavras_nao, respeitar tom de voz. Todos os scripts em blocos terminal premium: bg surface, border-left 4px primary, border-radius 0 12px 12px 0, badge canal emoji pill (📱WhatsApp / 📧Email / 📞Call / 💬DM), label momento muted, font mono, BOTÃO "📋 Copiar" no canto superior direito com navegador.clipboard.writeText + feedback "Copiado!".
+Hero da seção. EXATAMENTE 5 accordions — scripts completos, concisos e personalizados com dados da empresa. Sem [placeholders]. Respeitar tom de voz, palavras_sim e palavras_nao. Blocos terminal premium: bg surface, border-left 4px primary, border-radius 0 12px 12px 0, badge canal emoji pill (📱WhatsApp/📧Email/📞Call/💬DM), font mono, BOTÃO "📋 Copiar".
 
-① Cadência de Qualificação
-  Sequência completa: abertura com gancho → pergunta de situação → pergunta de problema → pergunta de implicação → pergunta de necessidade (SPIN) → síntese → proposta de próximo passo. Mínimo 4 mensagens sequenciais com labels de momento (Ex: "Msg 1 — Abertura", "Msg 2 — Diagnóstico").
+① Cadência de Qualificação — 3 mensagens: abertura com gancho + diagnóstico SPIN + proposta de próximo passo. Label de momento em cada uma (Msg 1 — Abertura, etc).
 
-② Follow Up 1 — Sem Resposta
-  Para leads que não responderam ao primeiro contato. Sequência D+1 → D+3 → D+5 → D+10 → Despedida. Cada mensagem com gancho diferente (curiosidade / prova social / urgência / último contato).
+② Follow Up — Sem Resposta — 3 mensagens D+1 / D+3 / D+7: ganchos distintos (curiosidade / prova social / último contato).
 
-③ Follow Up 2 — Após Primeiro Contato sem Agendamento
-  Para leads que responderam mas não agendaram ainda. Sequência de 4 mensagens escalando valor e urgência: reforço de benefício → case de cliente similar → oferta de facilitação (horário alternativo, formato diferente) → CTA final.
+③ Cadência de Agendamento — 2 mensagens: proposta de horário com opções + confirmação.
 
-④ Cadência de Agendamento
-  Mensagens para conduzir ao agendamento: proposta de horário com opções → confirmação do agendamento → mensagem de preparação ("O que esperar da nossa conversa").
+④ Script de Fechamento — script direto da call (abertura → diagnóstico → solução → ancoragem → fechamento) + 3 frases alternativas de fechamento em pills coloridas.
 
-⑤ Cadência de Lembrete de Agendamento
-  Sequência anti-no-show: D-2 (confirmação leve) → D-1 (lembrete com valor) → Dia da reunião manhã (motivação) → 1h antes (link/local + micro-expectativa). Tom amigável mas presente.
-
-⑥ Cadência de Fechamento — Script de Vendas
-  Script completo da reunião/call: abertura de rapport → pergunta de diagnóstico → confirmação da dor → apresentação de solução → ancoragem de valor → oferta → silêncio estratégico → tratativa de hesitação → fechamento. Mínimo 5 frases alternativas de fechamento em pills.
-
-⑦ Cadência de Negociação
-  Por objeção de preço/condição: Validar (reconhecer) → Esclarecer (entender a objeção real) → Redirecionar (valor > preço) → Fechar (proposta alternativa). Cobre: preço alto / sem orçamento agora / vou pensar / falar com sócio / concorrente mais barato / não é prioridade. Tabela: Objeção | Resposta Completa | Técnica.
-
-⑧ Cadência de Pós Venda
-  Sequência após fechamento: boas vindas (D+0) → check-in de onboarding (D+7) → acompanhamento de resultado (D+30) → pedido de depoimento/indicação (D+45) → oferta de upsell/cross-sell (D+60).
-
-⑨ Quebra de Objeção
-  Tabela premium com mínimo 8 objeções: Objeção | Script de Resposta Completo | Técnica utilizada (ancoragem/prova social/reframe/urgência) | Taxa de reversão esperada. Cobertura obrigatória: preço, tempo, concorrência, decisor ausente, "já tentei antes", "não é prioridade", "preciso pensar", "manda por e-mail".
+⑤ Quebra de Objeção — tabela premium com 5 objeções: Objeção | Resposta Completa | Técnica.
 
 ─── SEÇÃO 07 · ESTRUTURAÇÃO DO TIME COMERCIAL ───
-Hero da seção. 7 accordions expansíveis — um por cargo. Cada accordion contém 3 sub-cards ou tabs internos com visual distinto:
+Hero da seção. EXATAMENTE 4 accordions — um por cargo: SDR, Closer, Pós Venda e Gestor Comercial.
 
-CARD A — DESCRIÇÃO DE CARGO (header azul/primary)
-  Objetivo do cargo em 2 linhas + responsabilidades principais em checklist ✓ (mínimo 6 itens) + KPIs de performance (mínimo 4, em stat cards internos mini) + ferramentas utilizadas em badges + perfil ideal (hard skills em pills + soft skills em pills).
+Cada accordion contém 2 cards internos:
 
-CARD B — ROTINA COMERCIAL (header âmbar/accent)
-  Agenda modelo da semana em tabela: Dia | Horário | Atividade | Tempo | Objetivo. Rituais diários em checklist. Reuniões da semana (daily/weekly/review). Entregáveis por período: diário / semanal / mensal em cards coloridos.
+CARD A — DESCRIÇÃO DO CARGO (header primary)
+  Objetivo em 1-2 linhas + responsabilidades checklist ✓ (5 itens) + KPIs (3, em mini stat cards) + ferramentas em badges + perfil ideal em pills.
 
-CARD C — PLANO DE REMUNERAÇÃO (header verde)
-  Tabela de remuneração: Componente | Descrição | Valor/Critério. Inclui: salário base (range mínimo-máximo) + comissão (% e sobre o quê + gatilho de pagamento) + bônus (critérios de meta, superação) + benefícios. Tabela de simulação de ganhos: Cenário | Meta Atingida | Salário Base | Comissão | Bônus | Total Estimado — para meta 80%, 100% e 120%.
-
-Cargos (gerar todos os 7 acordeões):
-① SDR — Sales Development Representative (prospecção e qualificação de leads)
-② BDR — Business Development Representative (abertura de novas contas e canais)
-③ CLOSER — Executivo de Vendas (condução e fechamento de negociações)
-④ PÓS VENDA — Customer Success / Suporte (retenção, satisfação e expansão)
-⑤ FARMER — Gestor de Contas (relacionamento, upsell e cross-sell em base ativa)
-⑥ ANALISTA DE CRM — Operações Comerciais (dados, CRM, relatórios e processos)
-⑦ RESGATE DE ORÇAMENTO — Recuperação de Leads e Clientes inativos
+CARD B — REMUNERAÇÃO (header verde)
+  Tabela: Componente | Descrição | Valor/Critério (base + comissão + bônus). Simulação rápida: 3 linhas (meta 80% / 100% / 120%) com total estimado.
 
 O resultado deve parecer uma mistura de "Consultoria de growth + SaaS premium + dashboard executivo + manual operacional proprietário". Gere o playbook completo em HTML com as 7 seções, sidebar elegante, TODOS os sub-itens em accordions expansíveis com JavaScript funcional, todos os componentes premium, design sofisticado e sistema de edição inline.
 
